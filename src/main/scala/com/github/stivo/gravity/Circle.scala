@@ -5,7 +5,7 @@ import java.awt.{Color, Graphics2D}
 
 import com.github.stivo.gravity.Utils._
 import squants.mass.{Kilograms, Mass}
-import squants.space.{Area, Length}
+import squants.space.{Meters, Area, Length}
 
 
 object Circle {
@@ -14,7 +14,7 @@ object Circle {
 
 class Circle(var center: Point,
              var radius: Length,
-             var acceleration: Acceleration2D = Acceleration2D(),
+             var acceleration: Speed2D = Speed2D(),
              var color: Color = Color.black,
              var collisionCount: Int = 0,
              var massIn: Option[Mass] = None) {
@@ -24,7 +24,7 @@ class Circle(var center: Point,
     Circle.id
   }
 
-  var gravityPull: Acceleration2D = Acceleration2D()
+  var gravityPull: Speed2D = Speed2D()
 
   def withinBounds(drawingSurface: DrawingSurface): Boolean = {
     center.within(drawingSurface)
@@ -35,21 +35,8 @@ class Circle(var center: Point,
     center.distanceToSquared(circle2.center) < length * length
   }
 
-//  def mergeWith(other: Circle): Circle = {
-//    val newMass = mass + other.mass
-//    val newRadius = Math.sqrt(newMass)
-//    val newAcceleration = (acceleration * mass + other.acceleration * mass) / newMass
-//    val newCenter = this.center + (this.center - other.center) * (other.mass / newMass)
-//    new Circle(
-//      center,
-//      newRadius,
-//      newAcceleration,
-//      collisionCount = Math.max(collisionCount, other.collisionCount) + 1
-//    )
-//  }
-
   def updatePosition(): Unit = {
-    acceleration = acceleration + gravityPull / mass
+    acceleration = acceleration + gravityPull
     center = center.+(acceleration)
   }
 
@@ -57,33 +44,33 @@ class Circle(var center: Point,
     g.setPaint(color)
     g.fill(asEllipsis(drawingSurface))
     //    if (this.collisionCount > 0) {
-//    g.setPaint(Color.red)
+    //    g.setPaint(Color.red)
     //      g.drawString(collisionCount + "", center.x.toInt, center.y.toInt)
-//    g.drawLine(center.x.toInt, center.y.toInt, (center.x + acceleration.x).toInt, (center.y +acceleration.y).toInt)
-//    g.drawString(acceleration + "", center.x.toInt, center.y.toInt)
+    //    g.drawLine(center.x.toInt, center.y.toInt, (center.x + acceleration.x).toInt, (center.y +acceleration.y).toInt)
+    //    g.drawString(acceleration + "", center.x.toInt, center.y.toInt)
     //    }
   }
 
   def asEllipsis(drawingSurface: DrawingSurface): Ellipse2D.Double = {
-    val doubled: Double = drawingSurface.convertLength(radius * 2)
+    val doubled: Double = drawingSurface.convertRadius(radius * 2)
     val convertX1: Double = drawingSurface.convertWidth(center.x - radius)
     val convertY1: Double = drawingSurface.convertHeight(center.y - radius)
     new Ellipse2D.Double(convertX1, convertY1, doubled, doubled)
   }
 
-  def setGravityPull(finalAcceleration: Acceleration2D): Unit = {
+  def setGravityPull(finalAcceleration: Speed2D): Unit = {
     gravityPull = finalAcceleration
   }
 
-  def mass: Double = {
+  def mass: Mass = {
     massIn match {
-      case Some(mass) => mass.toKilograms
-      case None => (radius * radius).toSquareMeters
+      case Some(mass) => mass
+      case None => Kilograms((radius * radius * radius).toCubicMeters)
     }
   }
 
   override def toString: String =
-    s"$center ($radius) $acceleration"
+    f"$center%s (${radius.toMeters}%.1f" // radius) $acceleration"
 
   override def equals(any: Any): Boolean = any match {
     case other: Circle => this.id == other.id

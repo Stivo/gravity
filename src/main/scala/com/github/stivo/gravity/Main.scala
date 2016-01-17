@@ -4,7 +4,7 @@ import java.awt._
 import java.awt.event.{ActionEvent, ActionListener, WindowAdapter, WindowEvent}
 import javax.swing._
 
-import squants.time.Milliseconds
+import squants.time.{Days, Milliseconds}
 
 /**
  * Created by Stivo on 17.01.2016.
@@ -14,7 +14,7 @@ object Main {
   var break: Boolean = false
   val drawingSurface = new DrawingSurface()
 
-  val timeTick = Milliseconds(10)
+  val timeTick = Days(1)
 
   //  val stopWatch = new StopWatch
   def main(args: Array[String]) {
@@ -41,12 +41,12 @@ object Main {
     f.pack
     f.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH)
     f.setVisible(true)
-    new Timer(timeTick.toMilliseconds.toInt, new ActionListener() {
+    new Timer(10, new ActionListener() {
       override def actionPerformed(e: ActionEvent): Unit = {
         if (!break) {
           StopWatch.reset()
           StopWatch.start("Computing gravity")
-          applet.circles.updateVelocities(applet.getWidth, applet.getHeight)
+          applet.circles.updateVelocities()
           StopWatch.start("Computing new circle coordinates")
           applet.circles.nextTick()
           StopWatch.start("Detect collisions")
@@ -88,7 +88,7 @@ class CircleApplet extends JPanel {
     circles.drawTo(g2d)
     frameCounter.addTick()
 
-    var info: String = s"Circles: ${circles.circles.size}, ticks: ${circles.tick}, fps: ${frameCounter.getTicks()}, "
+    var info: String = s"Time: ${(Main.timeTick * circles.tick)} Circles: ${circles.circles.size}, ticks: ${circles.tick}, fps: ${frameCounter.getTicks()}, "
     info += StopWatch.finish().mapValues(long => long + "ms").mkString(", ")
     Main.label.setText(info)
     g2d.dispose

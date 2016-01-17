@@ -9,8 +9,8 @@ class DrawingSurface {
   private var displayWidth: Double = 0
   private var displayHeight: Double = 0
   private var g2d: Graphics2D = null
-  var simulationAreaRadius = Meters(40)
-  var minimumDrawingArea = Meters(10)
+  var minimumDrawingArea = SolarSystem.distanceToSun(SolarSystem.mars)
+  var simulationAreaRadius = minimumDrawingArea * 4
   var meterToPixel: Length = null
 
   def setGraphics(g2d: Graphics2D): Unit = {
@@ -39,6 +39,8 @@ class DrawingSurface {
     (middle + x / meterToPixel).toInt
   }
 
-  def convertLength(length: Length): Double = length / meterToPixel
+  def convertRadius(length: Length): Double = {
+    Math.max(2, length / meterToPixel)
+  }
 
 }

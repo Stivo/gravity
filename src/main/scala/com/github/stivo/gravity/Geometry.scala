@@ -7,7 +7,7 @@ package com.github.stivo.gravity
 import java.awt.geom.Point2D
 
 import com.github.stivo.gravity.Utils._
-import squants.motion.{MetersPerSecond, Velocity}
+import squants.motion.{Acceleration, MetersPerSecond, Velocity}
 import squants.space.{Meters, Area, Length}
 import squants.time.Seconds
 
@@ -29,7 +29,7 @@ case class Point(x: Length, y: Length) {
 
   def +(other: Point): Point = Point(x + other.x, y + other.y)
 
-  def +(acceleration: Acceleration2D): Point = {
+  def +(acceleration: Speed2D): Point = {
     Point(x + Main.timeTick * acceleration.x, y + Main.timeTick * acceleration.y)
   }
 
@@ -41,16 +41,25 @@ case class Point(x: Length, y: Length) {
     drawingSurface.isInWidth(x) && drawingSurface.isInHeight(y)
   }
 
-//  val length: Double = x ** 2 + (y ** 2)
-
-//  def asPoint2D = new Point2D.Double(x, y)
-
+  override def toString = f"${x.toMeters}%.1fm/${y.toMeters}%.1fm"
 }
 
-case class Acceleration2D(x: Velocity = MetersPerSecond(0), y: Velocity = MetersPerSecond(0)) {
-  def +(other: Acceleration2D): Acceleration2D = Acceleration2D(x + other.x, y + other.y)
+case class Speed2D(x: Velocity = MetersPerSecond(0), y: Velocity = MetersPerSecond(0)) {
+  def +(other: Speed2D): Speed2D = Speed2D(x + other.x, y + other.y)
 
-  def *(double: Double): Acceleration2D = Acceleration2D(x * double, y * double)
+  def *(double: Double): Speed2D = Speed2D(x * double, y * double)
 
-  def /(double: Double): Acceleration2D = Acceleration2D(x / double, y / double)
+  def /(double: Double): Speed2D = Speed2D(x / double, y / double)
+
+  override def toString = f"Speed: ${x.toMetersPerSecond}%.1fm/s / ${y.toMetersPerSecond}%.1fm/2s"
+}
+
+object Speed2D {
+  def apply(direction: Point, acceleration: Acceleration) = {
+    val resultSpeed = acceleration * Main.timeTick
+    val lengthOfVector = direction.x * direction.x + direction.y * direction.y
+    val length = Math.sqrt(lengthOfVector.toSquareMeters)
+    val scalingFactor: Double = resultSpeed.toMetersPerSecond / length
+    new Speed2D(direction.x / Seconds(1), direction.y / Seconds(1)) * scalingFactor
+  }
 }
