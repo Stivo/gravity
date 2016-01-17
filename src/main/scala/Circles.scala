@@ -27,11 +27,11 @@ class Circles {
   }
   def checkForCollisions() = {
     for {
-      cir1 <- circles
-      cir2 <- circles
-      if cir1 ne cir2
-      if cir1.collidesWith(cir2)
-    } yield Collision(cir1, cir2)
+      (circle1, index) <- circles.zipWithIndex
+      circle2 <- circles.take(index + 1)
+      if circle1 ne circle2
+      if circle1.collidesWith(circle2)
+    } yield Collision(circle1, circle2)
   }
 
   def updateCircles(width: Int, height: Int): Vector[Circle] = {
@@ -64,6 +64,7 @@ class Circle(var x: Int,
   def collidesWith(circle2: Circle) = {
     if (circle2.asEllipsis.intersects(x, y, radius, radius)) {
       color = Color.red
+      circle2.color = Color.red
       true
     } else {
       false
