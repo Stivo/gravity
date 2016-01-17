@@ -17,9 +17,10 @@ object Geometry {
 
 case class Point(x: Length, y: Length) {
 
-  def distanceTo(center: Point) = {
-    val area: Area = (x - center.x) ** 2 + (y - center.y) ** 2
-    Meters(Math.sqrt(area.toSquareMeters))
+  def distanceToSquared(other: Point): Double = {
+    val xDistance= x.toMeters - other.x.toMeters
+    val yDistance= y.toMeters - other.y.toMeters
+    xDistance * xDistance + yDistance * yDistance
   }
 
   def -(other: Point): Point = {

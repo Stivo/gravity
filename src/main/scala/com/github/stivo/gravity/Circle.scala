@@ -31,7 +31,8 @@ class Circle(var center: Point,
   }
 
   def collidesWith(circle2: Circle) = {
-    center.distanceTo(circle2.center) < radius + circle2.radius
+    val length: Double = radius.toMeters + circle2.radius.toMeters
+    center.distanceToSquared(circle2.center) < length * length
   }
 
 //  def mergeWith(other: Circle): Circle = {
