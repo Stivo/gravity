@@ -1,5 +1,7 @@
+package com.github.stivo.gravity
+
 import java.awt._
-import java.awt.event.{ActionEvent, ActionListener, WindowEvent, WindowAdapter}
+import java.awt.event.{ActionEvent, ActionListener, WindowAdapter, WindowEvent}
 import javax.swing._
 
 /**
@@ -7,6 +9,9 @@ import javax.swing._
  */
 object Main {
   val label: JLabel = new JLabel()
+  var break: Boolean = true
+  val drawingSurface = new DrawingSurface()
+
   //  val stopWatch = new StopWatch
   def main(args: Array[String]) {
     val f: JFrame = new JFrame("ShapesDemo2D")
@@ -18,22 +23,32 @@ object Main {
     val applet: CircleApplet = new CircleApplet
     f.getContentPane.add("Center", applet)
     val panel: JPanel = new JPanel()
-    panel.add(label)
+    panel.setLayout(new BorderLayout())
+    panel.add("Center", label)
+    val pauseButton = new Button("Pause")
+    pauseButton.addActionListener(new ActionListener {
+      override def actionPerformed(e: ActionEvent): Unit = {
+        break = !break
+      }
+    })
+    panel.add("West", pauseButton)
     f.getContentPane.add("South", panel)
     applet.init
     f.pack
     f.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH)
     f.setVisible(true)
-    new Timer(10, new ActionListener() {
+    new Timer(1000, new ActionListener() {
       override def actionPerformed(e: ActionEvent): Unit = {
-        StopWatch.reset()
-        StopWatch.start("Computing gravity")
-        applet.circles.updateVelocities(applet.getWidth, applet.getHeight)
-        StopWatch.start("Computing new circle coordinates")
-        applet.circles.tick(applet.getWidth, applet.getHeight)
-        StopWatch.start("Detect collisions")
-        applet.circles.applyCollisions()
-        applet.repaint()
+        if (!break) {
+          StopWatch.reset()
+          StopWatch.start("Computing gravity")
+          applet.circles.updateVelocities(applet.getWidth, applet.getHeight)
+          StopWatch.start("Computing new circle coordinates")
+          applet.circles.nextTick()
+          StopWatch.start("Detect collisions")
+          applet.circles.applyCollisions()
+          applet.repaint()
+        }
       }
     }).start()
   }
@@ -42,7 +57,7 @@ object Main {
 class CircleApplet extends JPanel {
   //  val stopWatch = new StopWatch
 
-  val circles = new Circles()
+  val circles = new Space(Main.drawingSurface)
   val frameCounter = new FrameCounter()
 
   def init(): Unit = {
@@ -54,6 +69,7 @@ class CircleApplet extends JPanel {
     super.paintComponent(g)
     StopWatch.start("Painting self")
     val g2d: Graphics2D = g.create().asInstanceOf[Graphics2D]
+    Main.drawingSurface.setGraphics(g2d)
     g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY)
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY)
@@ -65,9 +81,7 @@ class CircleApplet extends JPanel {
     val width: Int = g2d.getClipBounds.getWidth.toInt
     val height: Int = g2d.getClipBounds.getHeight.toInt
     g2d.clearRect(0, 0, width, height)
-    circles.circles.foreach(circle =>
-      circle.drawTo(g2d)
-    )
+    circles.drawTo(g2d)
     frameCounter.addTick()
 
     var info: String = s"Circles: ${circles.circles.size}, ticks: ${circles.tick}, fps: ${frameCounter.getTicks()}, "

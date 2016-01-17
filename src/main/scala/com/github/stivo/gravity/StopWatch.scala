@@ -1,3 +1,5 @@
+package com.github.stivo.gravity
+
 
 import scala.collection.mutable
 
