@@ -40,9 +40,7 @@ class Circles {
   def updateCircles(width: Int, height: Int): Vector[Circle] = {
     StopWatch.start("Update Position")
     circles.foreach(_.updatePosition())
-    StopWatch.start("Check bounds")
     circles = circles.filter(_.withinBounds(width, height))
-    StopWatch.start("After check bounds")
     circles
   }
 
@@ -63,11 +61,8 @@ class Circle(var x: Double,
              var yVelocity: Double = 0,
              var color: Color = Color.black) {
 
-  def xInt = Math.round(x)
-  def yInt = Math.round(y)
-
   def withinBounds(width: Int, height: Int): Boolean = {
-    (0 to width).contains(xInt) && (0 to height).contains(yInt)
+    0 <= x && x <= width && 0 <= y && y <= height
   }
 
   def collidesWith(circle2: Circle) = {
