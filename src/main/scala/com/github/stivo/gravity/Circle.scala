@@ -70,7 +70,7 @@ class Circle(var center: Point,
   }
 
   override def toString: String =
-    f"$center%s (${radius.toMeters}%.1f" // radius) $acceleration"
+    f"$center%s (${radius.toKilometers}%.1e radius) $acceleration, $mass"
 
   override def equals(any: Any): Boolean = any match {
     case other: Circle => this.id == other.id

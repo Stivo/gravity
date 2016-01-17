@@ -4,7 +4,7 @@ import java.awt._
 import java.awt.event.{ActionEvent, ActionListener, WindowAdapter, WindowEvent}
 import javax.swing._
 
-import squants.time.{Days, Milliseconds}
+import squants.time.{Hours, Days, Milliseconds}
 
 /**
  * Created by Stivo on 17.01.2016.
@@ -14,7 +14,7 @@ object Main {
   var break: Boolean = false
   val drawingSurface = new DrawingSurface()
 
-  val timeTick = Days(1)
+  val timeTick = Hours(6)
 
   //  val stopWatch = new StopWatch
   def main(args: Array[String]) {

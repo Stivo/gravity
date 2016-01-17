@@ -60,6 +60,6 @@ object Speed2D {
     val lengthOfVector = direction.x * direction.x + direction.y * direction.y
     val length = Math.sqrt(lengthOfVector.toSquareMeters)
     val scalingFactor: Double = resultSpeed.toMetersPerSecond / length
-    new Speed2D(direction.x / Seconds(1), direction.y / Seconds(1)) * scalingFactor
+    new Speed2D(direction.x * scalingFactor / Seconds(1), direction.y * scalingFactor / Seconds(1))
   }
 }

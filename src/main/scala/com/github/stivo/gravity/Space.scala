@@ -3,8 +3,9 @@ package com.github.stivo.gravity
 import java.awt.{Graphics2D, Color}
 
 import squants.mass.Kilograms
-import squants.motion.{Force, Newtons, MetersPerSecondSquared, MetersPerSecond}
-import squants.space.Meters
+import squants.motion._
+import squants.space.{Length, Meters}
+import squants.time.Seconds
 
 import scala.util.Random
 
@@ -15,13 +16,14 @@ class Space(drawingSurface: DrawingSurface) {
   var tick: Int = 0
 
   def randomDouble(range: Double = 1): Double = (random.nextDouble() - 0.5) * range
+  def randomPositiveDouble(range: Double = 1): Double = random.nextDouble() * range
 
   def addCircles(amount: Int = 1): Unit = {
     circles ++= {
       for (x <- 0 to amount)
         yield new Circle(
           Point(Meters(randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3)), Meters(randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3))),
-          Meters(randomDouble(drawingSurface.minimumDrawingArea.toMeters / 50)),
+          Meters(randomPositiveDouble(drawingSurface.minimumDrawingArea.toMeters / 50)),
           Speed2D(MetersPerSecond(randomDouble(10000)), MetersPerSecond(randomDouble(10000)))
         )
     }
@@ -33,14 +35,14 @@ class Space(drawingSurface: DrawingSurface) {
   //  circles +:= new Circle(Point(Meters(-10), Meters(0)), Meters(0.2), Acceleration2D(), Color.yellow)
   //  circles +:= new Circle(Point(500, 500), 5, Acceleration())
 
-//  circles +:= SolarSystem.sun.makeCircle(Color.yellow)
-//  circles +:= SolarSystem.earth.makeCircle(Color.blue)
-//  circles +:= SolarSystem.mercury.makeCircle(Color.green)
-//  circles +:= SolarSystem.venus.makeCircle(Color.red)
-//  circles +:= SolarSystem.mars.makeCircle(Color.red)
-//  circles +:= SolarSystem.pluto.makeCircle(Color.gray)
+    circles +:= SolarSystem.sun.makeCircle(Color.yellow)
+//    circles +:= SolarSystem.earth.makeCircle(Color.blue)
+//    circles +:= SolarSystem.mercury.makeCircle(Color.green)
+//    circles +:= SolarSystem.venus.makeCircle(Color.red)
+//    circles +:= SolarSystem.mars.makeCircle(Color.red)
+//    circles +:= SolarSystem.pluto.makeCircle(Color.gray)
 
-  println(circles)
+//  println(circles)
 
   def drawTo(g2d: Graphics2D) = {
     circles.foreach(circle =>
@@ -60,19 +62,20 @@ class Space(drawingSurface: DrawingSurface) {
   def mergeAll(circles: Vector[Circle]): Circle = {
     val by: Vector[Circle] = circles.sortBy(-_.radius)
     val newRadius = {
-      val allRadsSquared = by.map(_.radius.toMeters).map(rad => rad * rad).sum
-      Meters(Math.sqrt(allRadsSquared))
+      val allRadsSquared = by.map(_.mass.toKilograms).sum
+      Meters(Math.pow(allRadsSquared, 1.0 / 3))
     }
     val speed2D: Speed2D = {
       by.map(cir => cir.acceleration * cir.mass.toKilograms).reduce(_ + _) / by.map(_.mass.toKilograms).sum
     }
-    new Circle(
+    val out = new Circle(
       by(0).center,
       newRadius,
       acceleration = speed2D,
       collisionCount = by.map(_.collisionCount).max + 1,
       color = by(0).color
     )
+    out
   }
 
   def applyCollisions(): Unit = {
@@ -95,22 +98,49 @@ class Space(drawingSurface: DrawingSurface) {
 
 
   def updateVelocities() = {
-    var forces: Map[Circle, Vector[Speed2D]] = Map.empty
-
+    var forces: Map[Circle, (Vector[Length], Vector[Length])] = Map.empty
+    var computations = 0L
+    var saved = 0L
+    StopWatch.start("Computing forces for each pair")
     crossProduct.foreach { case (circle1, circle2) =>
       val distanceSquared: Double = circle1.center.distanceToSquared(circle2.center)
       val gravity: Force = Newtons(Geometry.gravitation * (circle1.mass.toKilograms * circle2.mass.toKilograms) / (distanceSquared))
+      val impulse = gravity * Main.timeTick
+      computations += 2
 
-      val forces1: Vector[Speed2D] = forces.getOrElse(circle1, Vector.empty)
-      val forces2: Vector[Speed2D] = forces.getOrElse(circle2, Vector.empty)
+      val point: Point = circle2.center - circle1.center
+      val lengthOfVector = point.x * point.x + point.y * point.y
+      val length = Math.sqrt(lengthOfVector.toSquareMeters)
 
-      forces += circle1 -> (forces1 :+ Speed2D((circle2.center - circle1.center), gravity / circle1.mass))
-      forces += circle2 -> (forces2 :+ Speed2D((circle1.center - circle2.center), gravity / circle2.mass))
+      if (circle2.mass / circle1.mass > 0.1) {
+        val point1 = point
+        val (vecX, vecY) = forces.getOrElse(circle1, (Vector.empty, Vector.empty))
+        val resultSpeed: Velocity = impulse / circle1.mass
+        val scalingFactor: Double = resultSpeed.toMetersPerSecond / length
+
+        forces += circle1 -> ((vecX :+ (point.x * scalingFactor), vecY :+ (point.y * scalingFactor)))
+      } else {
+        saved += 1
+//        println(s"Saved $circle1 vs $circle2 update for first because ${circle2.mass / circle1.mass}")
+      }
+      if (circle1.mass / circle2.mass > 0.1) {
+        val (vecX, vecY) = forces.getOrElse(circle2, (Vector.empty, Vector.empty))
+        val resultSpeed: Velocity = impulse / circle2.mass
+        val scalingFactor: Double = resultSpeed.toMetersPerSecond / length
+
+        forces += circle2 -> ((vecX :+ (point.x * scalingFactor * -1), vecY :+ (point.y * scalingFactor * -1)))
+      } else {
+        saved += 1
+//        println(s"Saved $circle1 vs $circle2 update for second because ${circle1.mass / circle2.mass}")
+      }
     }
+    println(s"Saved $saved of $computations (${saved *100.0 / computations}%)")
+    StopWatch.start("Computing final force")
     forces.foreach {
-      case (circle, accelerations) =>
-        val finalAcceleration: Speed2D = accelerations.reduce(_ + _)
-        circle.setGravityPull(finalAcceleration)
+      case (circle, (vx: Vector[Length], vy: Vector[Length])) =>
+        val finalX = vx.reduce(_ + _)
+        val finalY = vy.reduce(_ + _)
+        circle.setGravityPull(new Speed2D(finalX / Seconds(1), finalY / Seconds(1)))
     }
   }
 
@@ -130,6 +160,3 @@ class Space(drawingSurface: DrawingSurface) {
   }
 
 }
-
-
-case class Collision(cir1: Circle, cir2: Circle)
