@@ -1,6 +1,8 @@
 import java.awt.Graphics2D
 import java.awt.geom.Ellipse2D
 
+import scala.util.Random
+
 /**
  * Created by Stivo on 17.01.2016.
  */
@@ -9,33 +11,46 @@ class Circles {
   var circles = Vector[Circle]()
   var tick: Int = 0
 
-  def addCirclesAtX(width: Int, height: Int, x: Int = 0): Unit = {
+  def addCircles(width: Int, height: Int, amount: Int = 1): Unit = {
+    val random: Random = new Random()
     circles ++= {
-      for (y <- 0 to height by 5)
-        yield new Circle(x, y, 4)
+      for (x <- 0 to amount)
+        yield new Circle(
+          random.nextInt(width),
+          random.nextInt(height),
+          random.nextDouble() * 10,
+          random.nextInt(11) - 5,
+          random.nextInt(11) - 5
+        )
     }
   }
 
-  for (x <- 0 to 500 by 10) {
-    addCirclesAtX(2000, 1100, x)
-  }
-
-  def moveCirclesRight(width: Int): Vector[Circle] =
+  def updateCircles(width: Int, height: Int): Vector[Circle] = {
+    circles.foreach(_.updatePosition())
+    circles = circles.filter(_.withinBounds(width, height))
     circles
-      .withFilter(circle => circle.x < width + 100)
-      .map(circle => circle.copy(x = circle.x + 1))
+  }
 
   def tick(width: Int, height: Int): Unit = {
     tick += 1
     if (tick % 10 == 0) {
-      addCirclesAtX(width, height - 50)
+      addCircles(width, height - 50, 10)
     }
-    circles = moveCirclesRight(width)
+    updateCircles(width, height)
   }
 
 }
 
-case class Circle(x: Int, y: Int, radius: Double) {
+class Circle(var x: Int, var y: Int, var radius: Double, var xVelocity: Int = 1, var yVelocity: Int = 0) {
+  def withinBounds(width: Int, height: Int): Boolean = {
+    (0 to width).contains(x) && (0 to height).contains(y)
+  }
+
+  def updatePosition(): Unit = {
+    x += xVelocity
+    y += yVelocity
+  }
+
   def drawTo(g: Graphics2D): Unit = {
     g.fill(new Ellipse2D.Double(x, y, radius, radius))
   }
