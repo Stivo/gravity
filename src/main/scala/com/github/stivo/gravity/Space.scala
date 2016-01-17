@@ -2,34 +2,37 @@ package com.github.stivo.gravity
 
 import java.awt.{Graphics2D, Color}
 
+import squants.motion.MetersPerSecond
 import squants.space.Meters
 
 import scala.util.Random
 
 class Space(drawingSurface: DrawingSurface) {
+  val random: Random = new Random()
 
   var circles = Vector[Circle]()
   var tick: Int = 0
 
-  def addCircles(width: Int, height: Int, amount: Int = 1): Unit = {
-    val random: Random = new Random()
+  def randomDouble(range: Double = 1): Double = (random.nextDouble() - 0.5) * range
+
+  def addCircles(amount: Int = 1): Unit = {
     circles ++= {
       for (x <- 0 to amount)
         yield new Circle(
-          Point(Meters(random.nextDouble() * 20 - 10), Meters(random.nextDouble() * 20 - 10)),
-          Meters(random.nextDouble() * 3),
-          Acceleration2D()
+          Point(Meters(randomDouble(30)), Meters(randomDouble(30))),
+          Meters(randomDouble(0.3)),
+          Acceleration2D(MetersPerSecond(randomDouble(3)), MetersPerSecond(randomDouble(3)))
         )
     }
   }
 
-  addCircles(2000, 1400, 10000)
+  addCircles(1000)
   //
-//    circles +:= new Circle(Point(100, 100), 20, Acceleration())
+  circles +:= new Circle(Point(Meters(0), Meters(0)), Meters(1), Acceleration2D(), Color.yellow)
   //  circles +:= new Circle(Point(500, 500), 5, Acceleration())
 
-//  circles +:= SolarSystem.sun.makeCircle(Point(1000, 500), Color.yellow)
-//  circles +:= SolarSystem.earth.makeCircle(Point(1000 - scaleDistance(SolarSystem.sunToEarthDistance), 500), Color.blue)
+  //  circles +:= SolarSystem.sun.makeCircle(Point(1000, 500), Color.yellow)
+  //  circles +:= SolarSystem.earth.makeCircle(Point(1000 - scaleDistance(SolarSystem.sunToEarthDistance), 500), Color.blue)
 
   println(circles)
 
@@ -49,38 +52,40 @@ class Space(drawingSurface: DrawingSurface) {
   }
 
   def applyCollisions(): Unit = {
-//    val colliding = crossProduct.filter { case (c1, c2) => c1.collidesWith(c2) }
-//    if (!colliding.isEmpty) {
-//      val newCircles = colliding.map {
-//        case (c1, c2) =>
+    val colliding = crossProduct.filter { case (c1, c2) => c1.collidesWith(c2) }
+    if (!colliding.isEmpty) {
+      val newCircles = colliding.map {
+        case (c1, c2) =>
+          c1.color = Color.red
+          c2.color = Color.red
 //          c1.mergeWith(c2)
-//      }
-//      val remove = colliding.flatMap {
-//        case (c1, c2) => List(c1, c2)
-//      }.toSet
+      }
+      val remove = colliding.flatMap {
+        case (c1, c2) => List(c1, c2)
+      }.toSet
 //      circles = circles.filterNot(circle => remove.contains(circle))
 //      circles ++= newCircles
-//    }
+    }
   }
 
 
   def updateVelocities(getWidth: Int, getHeight: Int) = {
     var forces: Map[Circle, Vector[Acceleration2D]] = Map.empty
 
-//    crossProduct.foreach { case (circle1, circle2) =>
-//      val distance = reverseScaleDistance(circle1.center.distanceTo(circle2.center))
-//      val gravity = Geometry.gravitation * (circle1.mass * circle2.mass) / (distance ** 2)
-//
-//      val forces1: Vector[Acceleration2D] = forces.getOrElse(circle1, Vector.empty)
-//      val forces2: Vector[Acceleration2D] = forces.getOrElse(circle2, Vector.empty)
-//      forces += circle1 -> (forces1 :+ Acceleration2D.scaled((circle2.center - circle1.center), gravity))
-//      forces += circle2 -> (forces2 :+ Acceleration2D.scaled((circle1.center - circle2.center), gravity))
-//    }
-//    forces.foreach {
-//      case (circle, accelerations) =>
-//        val finalAcceleration: Acceleration2D = accelerations.reduce(_ + _)
-//        circle.setGravityPull(finalAcceleration)
-//    }
+    //    crossProduct.foreach { case (circle1, circle2) =>
+    //      val distance = reverseScaleDistance(circle1.center.distanceTo(circle2.center))
+    //      val gravity = Geometry.gravitation * (circle1.mass * circle2.mass) / (distance ** 2)
+    //
+    //      val forces1: Vector[Acceleration2D] = forces.getOrElse(circle1, Vector.empty)
+    //      val forces2: Vector[Acceleration2D] = forces.getOrElse(circle2, Vector.empty)
+    //      forces += circle1 -> (forces1 :+ Acceleration2D.scaled((circle2.center - circle1.center), gravity))
+    //      forces += circle2 -> (forces2 :+ Acceleration2D.scaled((circle1.center - circle2.center), gravity))
+    //    }
+    //    forces.foreach {
+    //      case (circle, accelerations) =>
+    //        val finalAcceleration: Acceleration2D = accelerations.reduce(_ + _)
+    //        circle.setGravityPull(finalAcceleration)
+    //    }
   }
 
   def updateCircles(): Vector[Circle] = {

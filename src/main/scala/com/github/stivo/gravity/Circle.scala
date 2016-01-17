@@ -4,7 +4,7 @@ import java.awt.geom.Ellipse2D
 import java.awt.{Color, Graphics2D}
 
 import com.github.stivo.gravity.Utils._
-import squants.mass.Mass
+import squants.mass.{Kilograms, Mass}
 import squants.space.{Area, Length}
 
 
@@ -31,14 +31,7 @@ class Circle(var center: Point,
   }
 
   def collidesWith(circle2: Circle) = {
-    false
-//    if (circle2.asEllipsis.intersects(center.x, center.y, radius, radius)) {
-//      color = Color.red
-//      circle2.color = Color.red
-//      true
-//    } else {
-//      false
-//    }
+    center.distanceTo(circle2.center) < radius + circle2.radius
   }
 
 //  def mergeWith(other: Circle): Circle = {
@@ -71,9 +64,9 @@ class Circle(var center: Point,
   }
 
   def asEllipsis(drawingSurface: DrawingSurface): Ellipse2D.Double = {
-    val doubled: Double = (radius * 2).toMeters
-    val convertX1: Double = drawingSurface.convert(center.x - radius)
-    val convertY1: Double = drawingSurface.convert(center.y - radius)
+    val doubled: Double = drawingSurface.convertLength(radius * 2)
+    val convertX1: Double = drawingSurface.convertWidth(center.x - radius)
+    val convertY1: Double = drawingSurface.convertHeight(center.y - radius)
     new Ellipse2D.Double(convertX1, convertY1, doubled, doubled)
   }
 
@@ -84,7 +77,7 @@ class Circle(var center: Point,
   def mass: Double = {
     massIn match {
       case Some(mass) => mass.toKilograms
-      case None => 0 // TODO radius * radius
+      case None => (radius * radius).toSquareMeters
     }
   }
 

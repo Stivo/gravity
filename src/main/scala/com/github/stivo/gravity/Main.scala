@@ -4,13 +4,17 @@ import java.awt._
 import java.awt.event.{ActionEvent, ActionListener, WindowAdapter, WindowEvent}
 import javax.swing._
 
+import squants.time.Milliseconds
+
 /**
  * Created by Stivo on 17.01.2016.
  */
 object Main {
   val label: JLabel = new JLabel()
-  var break: Boolean = true
+  var break: Boolean = false
   val drawingSurface = new DrawingSurface()
+
+  val timeTick = Milliseconds(10)
 
   //  val stopWatch = new StopWatch
   def main(args: Array[String]) {
@@ -37,7 +41,7 @@ object Main {
     f.pack
     f.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH)
     f.setVisible(true)
-    new Timer(1000, new ActionListener() {
+    new Timer(timeTick.toMilliseconds.toInt, new ActionListener() {
       override def actionPerformed(e: ActionEvent): Unit = {
         if (!break) {
           StopWatch.reset()

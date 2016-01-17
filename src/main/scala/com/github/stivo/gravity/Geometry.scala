@@ -29,7 +29,7 @@ case class Point(x: Length, y: Length) {
   def +(other: Point): Point = Point(x + other.x, y + other.y)
 
   def +(acceleration: Acceleration2D): Point = {
-    Point(x + acceleration.x * Seconds(1), y + acceleration.y * Seconds(1))
+    Point(x + Main.timeTick * acceleration.x, y + Main.timeTick * acceleration.y)
   }
 
   def /(double: Double): Point = Point(x / double, y / double)
@@ -52,11 +52,4 @@ case class Acceleration2D(x: Velocity = MetersPerSecond(0), y: Velocity = Meters
   def *(double: Double): Acceleration2D = Acceleration2D(x * double, y * double)
 
   def /(double: Double): Acceleration2D = Acceleration2D(x / double, y / double)
-}
-
-object Acceleration2D {
-//  def scaled(p: Point, length: Double): Acceleration2D = {
-//    val factor: Double = length / p.length
-//    Acceleration2D(p.x * factor, p.y * factor)
-//  }
 }
