@@ -2,10 +2,8 @@ import java.awt.{Color, Graphics2D}
 import java.awt.geom.Ellipse2D
 
 import scala.util.Random
+import Utils._
 
-/**
- * Created by Stivo on 17.01.2016.
- */
 class Circles {
 
 
@@ -17,24 +15,50 @@ class Circles {
     circles ++= {
       for (x <- 0 to amount)
         yield new Circle(
-          random.nextInt(width),
-          random.nextInt(height),
+          Point(random.nextInt(width), random.nextInt(height)),
           random.nextDouble() * 10,
-          (random.nextDouble() - 0.5) * 5,
-          (random.nextDouble() - 0.5) * 5
+          Acceleration()
         )
     }
   }
 
-  addCircles(2000, 1400, 1000)
+  addCircles(2000, 1400, 100)
+//
+//  circles +:= new Circle(Point(100, 100), 20, Acceleration())
+//  circles +:= new Circle(Poin  t(500, 500), 20, Acceleration())
 
-  def checkForCollisions() = {
+  def crossProduct = {
     for {
       (circle1, index) <- circles.zipWithIndex
       circle2 <- circles.take(index + 1)
       if circle1 ne circle2
-      if circle1.collidesWith(circle2)
-    } yield Collision(circle1, circle2)
+    } yield (circle1, circle2)
+  }
+
+  def checkForCollisions() = {
+    crossProduct
+      .filter{ case (c1, c2) => c1.collidesWith(c2)}
+      .map(Collision.tupled)
+  }
+
+
+  def updateVelocities(getWidth: Int, getHeight: Int) = {
+    var forces: Map[Circle, Vector[Acceleration]] = Map.empty
+
+    crossProduct.foreach { case (circle1, circle2) =>
+      val distance = circle1.center.distanceTo(circle2.center)
+      val gravity = Geometry.gravitation * (circle1.mass * circle2.mass) / (distance ** 2)
+
+      val forces1: Vector[Acceleration] = forces.getOrElse(circle1, Vector.empty)
+      val forces2: Vector[Acceleration] = forces.getOrElse(circle2, Vector.empty)
+      forces += circle1 -> (forces1 :+ Acceleration.scaled((circle2.center - circle1.center), gravity))
+      forces += circle2 -> (forces2 :+ Acceleration.scaled((circle1.center - circle2.center), gravity))
+    }
+    forces.foreach {
+      case (circle, accelerations) =>
+        val finalAcceleration: Acceleration = accelerations.reduce(_ + _)
+        circle.setGravityPull(finalAcceleration)
+    }
   }
 
   def updateCircles(width: Int, height: Int): Vector[Circle] = {
@@ -47,51 +71,12 @@ class Circles {
   def tick(width: Int, height: Int): Unit = {
     tick += 1
     if (tick % 10 == 0) {
-      addCircles(width, height, 1000 - circles.size)
+//      addCircles(width, height, 1000 - circles.size)
     }
     updateCircles(width, height)
   }
 
 }
 
-class Circle(var x: Double,
-             var y: Double,
-             var radius: Double,
-             var xVelocity: Double = 1,
-             var yVelocity: Double = 0,
-             var color: Color = Color.black) {
-
-  def withinBounds(width: Int, height: Int): Boolean = {
-    0 <= x && x <= width && 0 <= y && y <= height
-  }
-
-  def collidesWith(circle2: Circle) = {
-    if (circle2.asEllipsis.intersects(x, y, radius, radius)) {
-      color = Color.red
-      circle2.color = Color.red
-      true
-    } else {
-      false
-    }
-  }
-
-  def updatePosition(): Unit = {
-    x += xVelocity
-    y += yVelocity
-  }
-
-  def drawTo(g: Graphics2D): Unit = {
-    g.setPaint(color)
-    g.fill(asEllipsis)
-  }
-
-  def asEllipsis: Ellipse2D.Double = {
-    new Ellipse2D.Double(x, y, radius, radius)
-  }
-
-  override def toString: String =
-    s"$x/$y ($radius) $xVelocity/$yVelocity"
-
-}
 
 case class Collision(cir1: Circle, cir2: Circle)
