@@ -6,6 +6,7 @@ import javax.swing.{Timer, JPanel, JApplet, JFrame}
  * Created by Stivo on 17.01.2016.
  */
 object Main {
+  //  val stopWatch = new StopWatch
   def main(args: Array[String]) {
     val f: JFrame = new JFrame("ShapesDemo2D")
     f.addWindowListener(new WindowAdapter() {
@@ -13,14 +14,17 @@ object Main {
         System.exit(0)
       }
     })
+
     val applet: CircleApplet = new CircleApplet
     f.getContentPane.add("Center", applet)
     applet.init
     f.pack
-    f.setSize(new Dimension(550, 100))
+    f.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH)
     f.setVisible(true)
-    new Timer(10, new ActionListener() {
+    new Timer(1, new ActionListener() {
       override def actionPerformed(e: ActionEvent): Unit = {
+        StopWatch.reset()
+        StopWatch.start("Computing new circle coordinates")
         applet.circles.tick(applet.getWidth, applet.getHeight)
         applet.repaint()
       }
@@ -29,6 +33,7 @@ object Main {
 }
 
 class CircleApplet extends JPanel {
+  //  val stopWatch = new StopWatch
 
   val circles = new Circles()
   val frameCounter = new FrameCounter()
@@ -40,6 +45,7 @@ class CircleApplet extends JPanel {
 
   override def paintComponent(g: Graphics): Unit = {
     super.paintComponent(g)
+    StopWatch.start("Painting self")
     val g2d: Graphics2D = g.create().asInstanceOf[Graphics2D]
     val width: Int = g2d.getClipBounds.getWidth.toInt
     val height: Int = g2d.getClipBounds.getHeight.toInt
@@ -48,7 +54,9 @@ class CircleApplet extends JPanel {
       circle.drawTo(g2d)
     )
     frameCounter.addTick()
-    g2d.drawString(s"Circles: ${circles.circles.size}, ticks: ${circles.tick}, fps: ${frameCounter.getTicks()}", 0, height - 20)
+    var info: String = s"Circles: ${circles.circles.size}, ticks: ${circles.tick}, fps: ${frameCounter.getTicks()}, "
+    info += StopWatch.finish().mapValues(long => long + "ms").mkString(", ")
+    g2d.drawString(info, 0, height - 20)
     g2d.dispose
   }
 }

@@ -9,9 +9,15 @@ class Circles {
   var circles = Vector[Circle]()
   var tick: Int = 0
 
-  def addCirclesLeft(width: Int, height: Int) = {
-    for (x <- 0 to height by 5)
-      yield new Circle(0, x, 4)
+  def addCirclesAtX(width: Int, height: Int, x: Int = 0): Unit = {
+    circles ++= {
+      for (y <- 0 to height by 5)
+        yield new Circle(x, y, 4)
+    }
+  }
+
+  for (x <- 0 to 500 by 10) {
+    addCirclesAtX(2000, 1100, x)
   }
 
   def moveCirclesRight(width: Int): Vector[Circle] =
@@ -22,7 +28,7 @@ class Circles {
   def tick(width: Int, height: Int): Unit = {
     tick += 1
     if (tick % 10 == 0) {
-      circles ++= addCirclesLeft(width, height - 50)
+      addCirclesAtX(width, height - 50)
     }
     circles = moveCirclesRight(width)
   }
