@@ -24,7 +24,7 @@ object Main {
     f.pack
     f.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH)
     f.setVisible(true)
-    new Timer(100, new ActionListener() {
+    new Timer(10, new ActionListener() {
       override def actionPerformed(e: ActionEvent): Unit = {
         StopWatch.reset()
         StopWatch.start("Computing gravity")
@@ -32,8 +32,7 @@ object Main {
         StopWatch.start("Computing new circle coordinates")
         applet.circles.tick(applet.getWidth, applet.getHeight)
         StopWatch.start("Detect collisions")
-        val collisions: Vector[Collision] = applet.circles.checkForCollisions()
-        println(collisions)
+        applet.circles.applyCollisions()
         applet.repaint()
       }
     }).start()

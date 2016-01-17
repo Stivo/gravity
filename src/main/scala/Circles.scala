@@ -22,10 +22,10 @@ class Circles {
     }
   }
 
-  addCircles(2000, 1400, 100)
-//
-//  circles +:= new Circle(Point(100, 100), 20, Acceleration())
-//  circles +:= new Circle(Poin  t(500, 500), 20, Acceleration())
+    addCircles(2000, 1400, 1000)
+
+  circles +:= new Circle(Point(100, 100), 20, Acceleration())
+  circles +:= new Circle(Point(500, 500), 5, Acceleration())
 
   def crossProduct = {
     for {
@@ -35,10 +35,19 @@ class Circles {
     } yield (circle1, circle2)
   }
 
-  def checkForCollisions() = {
-    crossProduct
-      .filter{ case (c1, c2) => c1.collidesWith(c2)}
-      .map(Collision.tupled)
+  def applyCollisions(): Unit = {
+    val colliding = crossProduct.filter { case (c1, c2) => c1.collidesWith(c2) }
+    if (!colliding.isEmpty) {
+      val newCircles = colliding.map {
+        case (c1, c2) =>
+          c1.mergeWith(c2)
+      }
+      val remove = colliding.flatMap {
+        case (c1, c2) => List(c1, c2)
+      }.toSet
+      circles = circles.filterNot(circle => remove.contains(circle))
+      circles ++= newCircles
+    }
   }
 
 
@@ -71,7 +80,7 @@ class Circles {
   def tick(width: Int, height: Int): Unit = {
     tick += 1
     if (tick % 10 == 0) {
-//      addCircles(width, height, 1000 - circles.size)
+      //      addCircles(width, height, 1000 - circles.size)
     }
     updateCircles(width, height)
   }

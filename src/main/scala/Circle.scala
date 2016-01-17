@@ -10,7 +10,8 @@ object Circle {
 class Circle(var center: Point,
              var radius: Double,
              val acceleration: Acceleration = Acceleration(0, 0),
-             var color: Color = Color.black) {
+             var color: Color = Color.black,
+             var collisionCount: Int = 0) {
 
   val id = {
     Circle.id += 1
@@ -33,15 +34,30 @@ class Circle(var center: Point,
     }
   }
 
+  def mergeWith(other: Circle): Circle = {
+    val newMass = mass + other.mass
+    val newRadius = Math.sqrt(newMass)
+    val newAcceleration = (acceleration * mass + other.acceleration * mass) / newMass
+    val newCenter = this.center + (this.center - other.center) * (other.mass / newMass)
+    new Circle(
+      center,
+      newRadius,
+      newAcceleration,
+      collisionCount = Math.max(collisionCount, other.collisionCount) + 1
+    )
+  }
+
   def updatePosition(): Unit = {
-    center = center.add(acceleration + gravityPull)
+    center = center.+(acceleration + gravityPull / mass)
   }
 
   def drawTo(g: Graphics2D): Unit = {
     g.setPaint(color)
     g.fill(asEllipsis)
-//    g.setPaint(Color.yellow)
-//    g.fill(new Rectangle2D.Double(center.x, center.y, 1, 1))
+    if (this.collisionCount > 0) {
+      g.setPaint(Color.yellow)
+      g.drawString(collisionCount + "", center.x.toInt, center.y.toInt)
+    }
   }
 
   def asEllipsis: Ellipse2D.Double = {
@@ -53,6 +69,8 @@ class Circle(var center: Point,
     gravityPull = finalAcceleration
   }
 
+  def mass: Double = radius ** 2
+
   override def toString: String =
     s"$center ($radius) $acceleration"
 
@@ -62,7 +80,5 @@ class Circle(var center: Point,
   }
 
   override def hashCode(): Int = this.id
-
-  def mass: Double = radius ** 2
 
 }

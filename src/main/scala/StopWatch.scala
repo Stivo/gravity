@@ -1,10 +1,15 @@
+
+import scala.collection.mutable
+
 /**
  * Created by Stivo on 17.01.2016.
  */
 object StopWatch {
 
-  private var map: Map[String, Long] = Map.empty
-  private var currentPhase: Option[String] = None
+  private var map: mutable.Map[String, Long] = null
+  private var currentPhase: Option[String] = null
+
+  reset()
 
   def start(phase: String): Unit = {
     val now: Long = finishCurrentPhaseIfNeeded()
@@ -21,13 +26,13 @@ object StopWatch {
     now
   }
 
-  def finish(): Map[String, Long] = {
+  def finish(): mutable.Map[String, Long] = {
     finishCurrentPhaseIfNeeded()
     map
   }
 
   def reset(): Unit = {
     currentPhase = None
-    map = Map.empty
+    map = mutable.LinkedHashMap.empty
   }
 }
