@@ -2,6 +2,7 @@ package com.github.stivo.gravity
 
 import java.awt.{Graphics2D, Color}
 
+import com.github.stivo.gravity.calculation.{StandardGravityCalculator, GravityCalcalutor}
 import squants.mass.Kilograms
 import squants.motion._
 import squants.space.{Length, Meters}
@@ -10,7 +11,9 @@ import squants.time.{Days, Hours, Time, Seconds}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-class Space(drawingSurface: DrawingSurface, var timePerTick: Time = Hours(6)) {
+class Space(drawingSurface: DrawingSurface,
+            var timePerTick: Time = Hours(6),
+            var gravityCalculator: GravityCalcalutor = new StandardGravityCalculator()) {
 
   val random: Random = new Random()
 
@@ -124,48 +127,11 @@ class Space(drawingSurface: DrawingSurface, var timePerTick: Time = Hours(6)) {
 
 
   def updateVelocities() = {
-    var forces: Map[Circle, (Double, Double)] = Map.empty
-    var computations = 0L
-    var saved = 0L
-    StopWatch.start("Computing forces for each pair")
-    crossProduct { case (circle1, circle2) =>
-      val distanceSquared: Double = circle1.center.distanceToSquared(circle2.center)
-      val mass1: Double = circle1.mass.toKilograms
-      val mass2: Double = circle2.mass.toKilograms
-      val gravity: Force = Newtons(Geometry.gravitation * (mass1 * mass2) / (distanceSquared))
-      val impulse: Momentum = gravity * timePerTick
-      computations += 2
-
-      val point: Point = circle2.center - circle1.center
-      val xLen = point.x.toMeters
-      val yLen = point.y.toMeters
-      val lengthOfVector = xLen * xLen + yLen * yLen
-      val length = Math.sqrt(lengthOfVector)
-      val momentum: Momentum = impulse / length
-
-      if (mass2 / mass1 > 0.01) {
-        val (vecX, vecY) = forces.getOrElse(circle1, (0.0, 0.0))
-        val scalingFactor: Double = (momentum / circle1.mass).toMetersPerSecond
-
-        forces += circle1 -> ((vecX + xLen * scalingFactor, vecY + yLen * scalingFactor))
-      } else {
-        saved += 1
-        //        println(s"Saved $circle1 vs $circle2 update for first because ${circle2.mass / circle1.mass}")
-      }
-      if (mass1 / mass2 > 0.01) {
-        val (vecX, vecY) = forces.getOrElse(circle2, (0.0, 0.0))
-        val scalingFactor: Double = (momentum / circle2.mass).toMetersPerSecond
-
-        forces += circle2 -> ((vecX + xLen * scalingFactor * -1, vecY + yLen * scalingFactor * -1))
-      } else {
-        saved += 1
-        //        println(s"Saved $circle1 vs $circle2 update for second because ${circle1.mass / circle2.mass}")
-      }
-    }
+    val vectors: Iterable[Speed2D] = gravityCalculator.calculateForceVectors(circles, timePerTick)
     StopWatch.start("Computing final force")
-    forces.foreach {
-      case (circle, (vx, vy)) =>
-        circle.setGravityPull(new Speed2D(MetersPerSecond(vx), MetersPerSecond(vy)))
+    vectors.zip(circles).foreach {
+      case (speed, circle) =>
+        circle.setGravityPull(speed)
     }
   }
 
