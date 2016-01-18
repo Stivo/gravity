@@ -62,7 +62,7 @@ class Circle(var center: Point,
     gravityPull = finalAcceleration
   }
 
-  def mass: Mass = {
+  val mass: Mass = {
     massIn match {
       case Some(mass) => mass
       case None => Kilograms((radius * radius * radius).toCubicMeters)
