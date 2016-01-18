@@ -24,7 +24,7 @@ class Space(drawingSurface: DrawingSurface, var timePerTick: Time = Hours(6)) {
 
   def randomPositiveDouble(range: Double = 1): Double = random.nextDouble() * range
 
-  def addCircles(amount: Int = 1): Unit = {
+  def addCircles(amount: Int = 1, random: Random = random): Unit = {
     circles ++= {
       for (x <- 0 to amount)
         yield new Circle(
