@@ -5,16 +5,20 @@ import java.awt.{Graphics2D, Color}
 import squants.mass.Kilograms
 import squants.motion._
 import squants.space.{Length, Meters}
-import squants.time.Seconds
+import squants.time.{Days, Hours, Time, Seconds}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-class Space(drawingSurface: DrawingSurface) {
+class Space(drawingSurface: DrawingSurface, var timePerTick: Time = Hours(6)) {
+
   val random: Random = new Random()
 
+  var time: Time = Days(0)
+
   var circles = Vector[Circle]()
-  var tick: Int = 0
+
+  private var step: Int = 0
 
   def randomDouble(range: Double = 1): Double = (random.nextDouble() - 0.5) * range
 
@@ -31,21 +35,21 @@ class Space(drawingSurface: DrawingSurface) {
     }
   }
 
-  addCircles(2000)
+  //  addCircles(2000)
   //
   //  circles +:= new Circle(Point(Meters(0), Meters(0)), Meters(0.5), Acceleration2D(), Color.yellow)
   //  circles +:= new Circle(Point(Meters(-10), Meters(0)), Meters(0.2), Acceleration2D(), Color.yellow)
   //  circles +:= new Circle(Point(500, 500), 5, Acceleration())
 
-  circles +:= SolarSystem.sun.makeCircle(Color.yellow)
-
-      circles +:= SolarSystem.earth.makeCircle(Color.blue)
-      circles +:= SolarSystem.mercury.makeCircle(Color.green)
-      circles +:= SolarSystem.venus.makeCircle(Color.red)
-      circles +:= SolarSystem.mars.makeCircle(Color.red)
-      circles +:= SolarSystem.pluto.makeCircle(Color.gray)
-
   //  println(circles)
+
+  def addBodies(body: Iterable[Body]) = {
+    body.map(_.makeCircle()).foreach(circles +:= _)
+  }
+
+  def circleForBody(body: Body): Option[Circle] = {
+    circles.filter(_.body == Some(body)).headOption
+  }
 
   def drawTo(g2d: Graphics2D) = {
     circles.foreach(circle =>
@@ -129,7 +133,7 @@ class Space(drawingSurface: DrawingSurface) {
       val mass1: Double = circle1.mass.toKilograms
       val mass2: Double = circle2.mass.toKilograms
       val gravity: Force = Newtons(Geometry.gravitation * (mass1 * mass2) / (distanceSquared))
-      val impulse: Momentum = gravity * Main.timeTick
+      val impulse: Momentum = gravity * timePerTick
       computations += 2
 
       val point: Point = circle2.center - circle1.center
@@ -158,7 +162,6 @@ class Space(drawingSurface: DrawingSurface) {
         //        println(s"Saved $circle1 vs $circle2 update for second because ${circle1.mass / circle2.mass}")
       }
     }
-    println(s"Saved $saved of $computations (${saved * 100.0 / computations}%)")
     StopWatch.start("Computing final force")
     forces.foreach {
       case (circle, (vx, vy)) =>
@@ -168,16 +171,18 @@ class Space(drawingSurface: DrawingSurface) {
 
   def updateCircles(): Vector[Circle] = {
     StopWatch.start("Update Position")
-    circles.foreach(_.updatePosition())
+    circles.foreach(_.updatePosition(timePerTick))
     circles = circles.filter(_.withinBounds(drawingSurface))
     circles
   }
 
   def nextTick(): Unit = {
-    tick += 1
-    if (tick % 10 == 0) {
+    step += 1
+    time += timePerTick
+    if (step % 10 == 0) {
       //      addCircles(1000 - circles.size)
     }
+    updateVelocities()
     updateCircles()
   }
 

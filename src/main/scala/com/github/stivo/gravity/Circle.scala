@@ -6,6 +6,7 @@ import java.awt.{Color, Graphics2D}
 import com.github.stivo.gravity.Utils._
 import squants.mass.{Kilograms, Mass}
 import squants.space.{Meters, Area, Length}
+import squants.time.Time
 
 
 object Circle {
@@ -17,7 +18,8 @@ class Circle(var center: Point,
              var acceleration: Speed2D = Speed2D(),
              var color: Color = Color.black,
              var collisionCount: Int = 0,
-             var massIn: Option[Mass] = None) {
+             var massIn: Option[Mass] = None,
+             val body: Option[Body] = None) {
 
   val id = {
     Circle.id += 1
@@ -35,9 +37,9 @@ class Circle(var center: Point,
     center.distanceToSquared(circle2.center) < length * length
   }
 
-  def updatePosition(): Unit = {
+  def updatePosition(tick: Time): Unit = {
     acceleration = acceleration + gravityPull
-    center = center.+(acceleration)
+    center = center.+(acceleration, tick)
   }
 
   def drawTo(g: Graphics2D, drawingSurface: DrawingSurface): Unit = {

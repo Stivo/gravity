@@ -14,8 +14,6 @@ object Main {
   var break: Boolean = false
   val drawingSurface = new DrawingSurface()
 
-  val timeTick = Hours(6)
-
   //  val stopWatch = new StopWatch
   def main(args: Array[String]) {
     val f: JFrame = new JFrame("ShapesDemo2D")
@@ -46,11 +44,11 @@ object Main {
         if (!break) {
           StopWatch.reset()
           StopWatch.start("Computing gravity")
-          applet.circles.updateVelocities()
+          applet.space.updateVelocities()
           StopWatch.start("Computing new circle coordinates")
-          applet.circles.nextTick()
+          applet.space.nextTick()
           StopWatch.start("Detect collisions")
-          applet.circles.applyCollisions()
+          applet.space.applyCollisions()
           applet.repaint()
         }
       }
@@ -61,8 +59,9 @@ object Main {
 class CircleApplet extends JPanel {
   //  val stopWatch = new StopWatch
 
-  val circles = new Space(Main.drawingSurface)
+  val space = new Space(Main.drawingSurface)
   val frameCounter = new FrameCounter()
+  space.addBodies(SolarSystem.bodies)
 
   def init(): Unit = {
     setBackground(Color.white)
@@ -85,10 +84,10 @@ class CircleApplet extends JPanel {
     val width: Int = g2d.getClipBounds.getWidth.toInt
     val height: Int = g2d.getClipBounds.getHeight.toInt
     g2d.clearRect(0, 0, width, height)
-    circles.drawTo(g2d)
+    space.drawTo(g2d)
     frameCounter.addTick()
 
-    var info: String = s"Time: ${(Main.timeTick * circles.tick)} Circles: ${circles.circles.size}, ticks: ${circles.tick}, fps: ${frameCounter.getTicks()}, "
+    var info: String = f"Time: ${space.time.toDays}%.1f Circles: ${space.circles.size}%d, fps: ${frameCounter.framesPerSecond()}%d, "
     info += StopWatch.finish().mapValues(long => long + "ms").mkString(", ")
     Main.label.setText(info)
     g2d.dispose

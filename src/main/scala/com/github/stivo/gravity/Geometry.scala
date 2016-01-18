@@ -9,7 +9,7 @@ import java.awt.geom.Point2D
 import com.github.stivo.gravity.Utils._
 import squants.motion.{Acceleration, MetersPerSecond, Velocity}
 import squants.space.{Meters, Area, Length}
-import squants.time.Seconds
+import squants.time.{Time, Seconds}
 
 object Geometry {
   var gravitation = 6.674 * (10 ** -11) // N?m2/kg2
@@ -18,9 +18,14 @@ object Geometry {
 case class Point(x: Length, y: Length) {
 
   def distanceToSquared(other: Point): Double = {
-    val xDistance= x.toMeters - other.x.toMeters
-    val yDistance= y.toMeters - other.y.toMeters
+    val xDistance = x.toMeters - other.x.toMeters
+    val yDistance = y.toMeters - other.y.toMeters
     xDistance * xDistance + yDistance * yDistance
+  }
+
+  def distance(other: Point): Length = {
+    val squared: Double = distanceToSquared(other)
+    Meters(Math.sqrt(squared))
   }
 
   def -(other: Point): Point = {
@@ -29,8 +34,8 @@ case class Point(x: Length, y: Length) {
 
   def +(other: Point): Point = Point(x + other.x, y + other.y)
 
-  def +(acceleration: Speed2D): Point = {
-    Point(x + Main.timeTick * acceleration.x, y + Main.timeTick * acceleration.y)
+  def +(acceleration: Speed2D, time: Time): Point = {
+    Point(x + time * acceleration.x, y + time * acceleration.y)
   }
 
   def /(double: Double): Point = Point(x / double, y / double)
@@ -55,11 +60,10 @@ case class Speed2D(x: Velocity = MetersPerSecond(0), y: Velocity = MetersPerSeco
 }
 
 object Speed2D {
-  def apply(direction: Point, acceleration: Acceleration) = {
-    val resultSpeed = acceleration * Main.timeTick
+  def apply(direction: Point, speed: Velocity) = {
     val lengthOfVector = direction.x * direction.x + direction.y * direction.y
     val length = Math.sqrt(lengthOfVector.toSquareMeters)
-    val scalingFactor: Double = resultSpeed.toMetersPerSecond / length
+    val scalingFactor: Double = speed.toMetersPerSecond / length
     new Speed2D(direction.x * scalingFactor / Seconds(1), direction.y * scalingFactor / Seconds(1))
   }
 }

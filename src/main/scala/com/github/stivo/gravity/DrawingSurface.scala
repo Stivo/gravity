@@ -40,7 +40,7 @@ class DrawingSurface {
   }
 
   def convertRadius(length: Length): Double = {
-    Math.max(1, length / meterToPixel)
+    Math.max(5, length / meterToPixel)
   }
 
 }

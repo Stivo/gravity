@@ -22,7 +22,7 @@ class FrameCounter {
     ticks = ticks.dropWhile(_ < startToKeep)
   }
 
-  def getTicks(seconds: Int = 1): Int = {
+  def framesPerSecond(seconds: Int = 1): Int = {
     val last: Long = ticks.last
     val start = last - seconds * 1000
     ticks.size - ticks.lastIndexWhere(_ < start)
