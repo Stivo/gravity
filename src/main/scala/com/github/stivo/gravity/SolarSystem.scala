@@ -33,9 +33,6 @@ object SolarSystem {
 
   val sunToEarthDistance = Kilometers(147.09 * (10 ** 6))
 
-  def main(args: Array[String]): Unit = {
-  }
-
   //  def scaleDistance(distance: Double) = 500 * distance / sunToEarthDistance
   //
   //  def reverseScaleDistance(distance: Double) = distance * sunToEarthDistance / 500
