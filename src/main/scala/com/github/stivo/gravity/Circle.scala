@@ -4,7 +4,8 @@ import java.awt.geom.Ellipse2D
 import java.awt.{Color, Graphics2D}
 
 import com.github.stivo.gravity.Utils._
-import squants.mass.{Kilograms, Mass}
+import squants.mass.{AreaDensity, Kilograms, Mass}
+import squants.motion.{Acceleration, Newtons}
 import squants.space.{Meters, Area, Length}
 import squants.time.Time
 
@@ -16,10 +17,11 @@ object Circle {
 class Circle(var center: Point,
              var radius: Length,
              var acceleration: Speed2D = Speed2D(),
-             var color: Color = Color.black,
+             var color: Color = Color.white,
              var collisionCount: Int = 0,
              var massIn: Option[Mass] = None,
              val body: Option[Body] = None) {
+
 
   val id = {
     Circle.id += 1
@@ -69,6 +71,12 @@ class Circle(var center: Point,
       case Some(mass) => mass
       case None => Kilograms((radius * radius * radius).toCubicMeters)
     }
+  }
+
+  def gravityTo(other: Circle): Point = {
+    val distance: Double = this.center.distanceToSquared(other.center)
+    val acceleration = Geometry.gravitation * (other.mass.toKilograms) / ( distance )
+    (other.center - center) * (acceleration / Math.sqrt(distance))
   }
 
   override def toString: String =

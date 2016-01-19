@@ -1,12 +1,10 @@
 package com.github.stivo.gravity.calculation
 
 import com.github.stivo.gravity._
-import squants.motion.{MetersPerSecond, Newtons, Momentum, Force}
-import squants.space.Meters
+import squants.motion.{Force, MetersPerSecond, Momentum, Newtons}
 import squants.time.Time
 
-class StandardGravityCalculator extends GravityCalculator {
-
+class GravityCalculatorV2 extends GravityCalculator {
 
   override def calculateForceVectors(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
     def crossProduct(f: (Circle, Circle) => Unit) = {
@@ -38,26 +36,19 @@ class StandardGravityCalculator extends GravityCalculator {
       val yLen = point.y.toMeters
       val lengthOfVector = xLen * xLen + yLen * yLen
       val length = Math.sqrt(lengthOfVector)
-      val momentum: Momentum = impulse / length
+      val momentum: Momentum = impulse / length;
+    {
+      val (vecX, vecY) = forces.getOrElse(circle1, (0.0, 0.0))
+      val scalingFactor: Double = (momentum / circle1.mass).toMetersPerSecond
 
-      if (mass2 / mass1 > 0.01) {
-        val (vecX, vecY) = forces.getOrElse(circle1, (0.0, 0.0))
-        val scalingFactor: Double = (momentum / circle1.mass).toMetersPerSecond
+      forces += circle1 -> ((vecX + xLen * scalingFactor, vecY + yLen * scalingFactor))
+    };
+    {
+      val (vecX, vecY) = forces.getOrElse(circle2, (0.0, 0.0))
+      val scalingFactor: Double = (momentum / circle2.mass).toMetersPerSecond
 
-        forces += circle1 -> ((vecX + xLen * scalingFactor, vecY + yLen * scalingFactor))
-      } else {
-        saved += 1
-        //        println(s"Saved $circle1 vs $circle2 update for first because ${circle2.mass / circle1.mass}")
-      }
-      if (mass1 / mass2 > 0.01) {
-        val (vecX, vecY) = forces.getOrElse(circle2, (0.0, 0.0))
-        val scalingFactor: Double = (momentum / circle2.mass).toMetersPerSecond
-
-        forces += circle2 -> ((vecX + xLen * scalingFactor * -1, vecY + yLen * scalingFactor * -1))
-      } else {
-        saved += 1
-        //        println(s"Saved $circle1 vs $circle2 update for second because ${circle1.mass / circle2.mass}")
-      }
+      forces += circle2 -> ((vecX + xLen * scalingFactor * -1, vecY + yLen * scalingFactor * -1))
+    }
     }
     circles.map(circle => forces(circle) match {
       case (x, y) => new Speed2D(MetersPerSecond(x), MetersPerSecond(y))

@@ -6,7 +6,7 @@ import squants.time.Time
 /**
  * Created by Stivo on 18.01.2016.
  */
-trait GravityCalcalutor {
+trait GravityCalculator {
 
   def calculateForceVectors(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D]
 

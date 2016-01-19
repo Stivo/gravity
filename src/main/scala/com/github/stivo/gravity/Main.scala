@@ -4,7 +4,11 @@ import java.awt._
 import java.awt.event.{ActionEvent, ActionListener, WindowAdapter, WindowEvent}
 import javax.swing._
 
+import com.github.stivo.gravity.calculation.{NaiveWhileGravityCalculator, NaiveGravityCalculator}
+import squants.space.Meters
 import squants.time.{Hours, Days, Milliseconds}
+
+import scala.util.Random
 
 /**
  * Created by Stivo on 17.01.2016.
@@ -44,8 +48,6 @@ object Main {
         if (!break) {
           StopWatch.reset()
           StopWatch.start("Computing gravity")
-          applet.space.updateVelocities()
-          StopWatch.start("Computing new circle coordinates")
           applet.space.nextTick()
           StopWatch.start("Detect collisions")
           applet.space.applyCollisions()
@@ -59,13 +61,15 @@ object Main {
 class CircleApplet extends JPanel {
   //  val stopWatch = new StopWatch
 
-  val space = new Space(Main.drawingSurface)
+  val space = new Space(Main.drawingSurface, gravityCalculator = new NaiveGravityCalculator)
   val frameCounter = new FrameCounter()
-  space.addBodies(SolarSystem.bodies)
+//  space.addBodies(SolarSystem.bodies)
+  space.addCircles(1000)
+  space.circles :+= new Circle(new Point(Meters(0), Meters(0)), Main.drawingSurface.simulationAreaRadius / 80, color = Color.yellow)
 
   def init(): Unit = {
-    setBackground(Color.white)
-    setForeground(Color.black)
+    setBackground(Color.black)
+    setForeground(Color.white)
   }
 
   override def paintComponent(g: Graphics): Unit = {
@@ -83,7 +87,8 @@ class CircleApplet extends JPanel {
     g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
     val width: Int = g2d.getClipBounds.getWidth.toInt
     val height: Int = g2d.getClipBounds.getHeight.toInt
-    g2d.clearRect(0, 0, width, height)
+    g2d.setColor(Color.black)
+    g2d.fillRect(0, 0, width, height)
     space.drawTo(g2d)
     frameCounter.addTick()
 

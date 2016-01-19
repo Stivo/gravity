@@ -1,3 +1,4 @@
+import com.github.stivo.gravity.calculation._
 import com.github.stivo.gravity.{DrawingSurface, Space}
 import com.janosgyerik.microbench.api.BenchmarkRunner
 import com.janosgyerik.microbench.api.annotation.{Benchmark, MeasureTime}
@@ -10,17 +11,20 @@ import scala.util.Random
  */
 object PerformanceTest extends App {
 
+  for (calc <- List[GravityCalculator](
+    new NaiveGravityCalculator,
+    new NaiveWhileGravityCalculator,
+    new NaiveParallelGravityCalculator)) {
+    for (x <- List(500, 1000, 2000)) {
+      println(s"Now running $x with ${calc.getClass.getSimpleName}")
+      BenchmarkRunner.run(new OneTick(x, calc))
+    }
+  }
 
-  BenchmarkRunner.run(new OneTick(100))
-  BenchmarkRunner.run(new OneTick(500))
-  BenchmarkRunner.run(new OneTick(1000))
-  BenchmarkRunner.run(new OneTick(2000))
-
-  @Benchmark(iterations = 5)
-  class OneTick(planets: Int) {
-    val space: Space = new Space(new DrawingSurface)
-    val random: Random = new Random(0)
-    space.addCircles(planets, random)
+  @Benchmark(warmUpIterations = 2, iterations = 3)
+  class OneTick(planets: Int, gravityCalculator: GravityCalculator) {
+    val space: Space = new Space(new DrawingSurface, gravityCalculator = gravityCalculator, random = new Random(0))
+    space.addCircles(planets)
 
     @MeasureTime
     def computeVelocities(): Unit = {
