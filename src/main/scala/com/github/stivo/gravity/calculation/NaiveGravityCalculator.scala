@@ -7,7 +7,7 @@ import squants.time.Time
 /**
  * Created by Stivo on 18.01.2016.
  */
-class NaiveGravityCalculator extends GravityCalculator {
+class NaiveGravityCalculator(parallel: Boolean = true) extends GravityCalculator {
 
   def makeSpeed(point: Point, timePerTick: Time) = {
     val x: Velocity = MetersPerSecondSquared(point.x.toMeters) * timePerTick
@@ -16,7 +16,12 @@ class NaiveGravityCalculator extends GravityCalculator {
   }
 
   override def calculateForceVectors(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
-    (for (c1 <- circles)
+    val circles1 = if (parallel) {
+      circles.par
+    } else {
+      circles
+    }
+    (for (c1 <- circles1)
       yield makeSpeed(circles.withFilter(c1 ne _).map(c2 => c1.gravityTo(c2)).reduce(_ + _), timePerTick)).toIndexedSeq
   }
 }

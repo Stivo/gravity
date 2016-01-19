@@ -12,9 +12,10 @@ import scala.util.Random
 object PerformanceTest extends App {
 
   for (calc <- List[GravityCalculator](
-    new NaiveGravityCalculator,
-    new NaiveWhileGravityCalculator,
-    new NaiveParallelGravityCalculator)) {
+    new NaiveGravityCalculator(parallel = false),
+    new NaiveWhileGravityCalculator(),
+    new NaiveGravityCalculator(parallel = true))) {
+
     for (x <- List(500, 1000, 2000)) {
       println(s"Now running $x with ${calc.getClass.getSimpleName}")
       BenchmarkRunner.run(new OneTick(x, calc))
@@ -32,4 +33,5 @@ object PerformanceTest extends App {
     }
 
   }
+
 }
