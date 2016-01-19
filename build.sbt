@@ -11,3 +11,5 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 resolvers += "Janos" at "http://maven.janosgyerik.com/"
 
 libraryDependencies += "com.janosgyerik" % "microbench" % "1.0"
+
+libraryDependencies += "com.github.scala-blitz" %% "scala-blitz" % "1.1"

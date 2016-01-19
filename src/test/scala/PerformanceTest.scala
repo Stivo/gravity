@@ -14,7 +14,10 @@ object PerformanceTest extends App {
   for (calc <- List[GravityCalculator](
     new NaiveGravityCalculator(parallel = false),
     new NaiveWhileGravityCalculator(),
-    new NaiveGravityCalculator(parallel = true))) {
+    new NaiveGravityCalculator(parallel = true),
+    new NaiveDoubleGravityCalculator(parallel = false),
+    new NaiveDoubleGravityCalculator(parallel = true)
+  )) {
 
     for (x <- List(500, 1000, 2000)) {
       println(s"Now running $x with ${calc.getClass.getSimpleName}")

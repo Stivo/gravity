@@ -36,4 +36,7 @@ class NaiveWhileGravityCalculator extends GravityCalculator {
     }
     ds
   }
+
+  override def toString: String = "Naive with while"
+
 }

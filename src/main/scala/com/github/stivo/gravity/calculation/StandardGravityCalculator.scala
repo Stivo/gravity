@@ -63,4 +63,6 @@ class StandardGravityCalculator extends GravityCalculator {
       case (x, y) => new Speed2D(MetersPerSecond(x), MetersPerSecond(y))
     })
   }
+
+  override def toString: String = "badly optimized"
 }
