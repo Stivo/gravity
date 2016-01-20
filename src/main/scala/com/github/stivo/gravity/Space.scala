@@ -2,7 +2,7 @@ package com.github.stivo.gravity
 
 import java.awt.{Graphics2D, Color}
 
-import com.github.stivo.gravity.calculation.{StandardGravityCalculator, GravityCalculator}
+import com.github.stivo.gravity.calculation.{NaiveDoubleGravityCalculator, StandardGravityCalculator, GravityCalculator}
 import squants.mass.Kilograms
 import squants.motion._
 import squants.space.{Length, Meters}
@@ -13,7 +13,7 @@ import scala.util.Random
 
 class Space(drawingSurface: DrawingSurface,
             var timePerTick: Time = Hours(6),
-            var gravityCalculator: GravityCalculator = new StandardGravityCalculator(),
+            var gravityCalculator: GravityCalculator = new NaiveDoubleGravityCalculator(),
             val random: Random = new Random()) {
 
 
@@ -27,6 +27,10 @@ class Space(drawingSurface: DrawingSurface,
   def randomDouble(range: Double = 1): Double = (random.nextDouble() - 0.5) * range
 
   def randomPositiveDouble(range: Double = 1): Double = random.nextDouble() * range
+  def randomLightColor(): Color = {
+    def randomLight = random.nextInt(199) + 56
+    new Color(randomLight, randomLight, randomLight)
+  }
 
   def addCircles(amount: Int = 1): Unit = {
     circles ++= {
@@ -34,7 +38,8 @@ class Space(drawingSurface: DrawingSurface,
         yield new Circle(
           Point(Meters(randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3)), Meters(randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3))),
           Meters(randomPositiveDouble(drawingSurface.minimumDrawingArea.toMeters / 100)),
-          Speed2D(MetersPerSecond(randomDouble(100000)), MetersPerSecond(randomDouble(100000)))
+          Speed2D(MetersPerSecond(randomDouble(100000)), MetersPerSecond(randomDouble(100000))),
+          color = randomLightColor()
         )
     }
   }

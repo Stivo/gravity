@@ -1,7 +1,7 @@
 package com.github.stivo.gravity
 
 import java.awt._
-import java.awt.event.{ActionEvent, ActionListener, WindowAdapter, WindowEvent}
+import java.awt.event._
 import javax.swing._
 
 import com.github.stivo.gravity.calculation.{StandardGravityCalculator, NaiveDoubleGravityCalculator, NaiveWhileGravityCalculator, NaiveGravityCalculator}
@@ -66,6 +66,8 @@ class CircleApplet extends JPanel {
 //  space.addBodies(SolarSystem.bodies)
   space.addCircles(1000)
 //  space.circles :+= new Circle(new Point(Meters(0), Meters(0)), Main.drawingSurface.simulationAreaRadius / 80, color = Color.yellow)
+
+  Main.drawingSurface.addListeners(this)
 
   def init(): Unit = {
     setBackground(Color.black)
