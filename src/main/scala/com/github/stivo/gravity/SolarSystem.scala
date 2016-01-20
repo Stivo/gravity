@@ -27,7 +27,7 @@ object SolarSystem {
     case `mercury` => Kilometers(46 * (10 ** 6))
     case `earth` => sunToEarthDistance
     case `venus` => Kilometers(107.477 * (10 ** 6))
-    case `mars` => Kilometers(227940000)
+    case `mars` => Kilometers(227.94 * (10 ** 6))
     case `pluto` => Kilometers(4436.8 * (10 ** 6))
   }
 

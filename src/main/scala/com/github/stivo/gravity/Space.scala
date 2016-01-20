@@ -34,9 +34,10 @@ class Space(drawingSurface: DrawingSurface,
 
   def addCircles(amount: Int = 1): Unit = {
     circles ++= {
+      def randomDoubleInSpace = randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3)
       for (x <- 0 to amount)
         yield new Circle(
-          Point(Meters(randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3)), Meters(randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3))),
+          Point(Meters(randomDoubleInSpace) + drawingSurface.xOffset, Meters(randomDoubleInSpace) + drawingSurface.yOffset),
           Meters(randomPositiveDouble(drawingSurface.minimumDrawingArea.toMeters / 100)),
           Speed2D(MetersPerSecond(randomDouble(100000)), MetersPerSecond(randomDouble(100000))),
           color = randomLightColor()

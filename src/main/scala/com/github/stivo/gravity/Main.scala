@@ -7,7 +7,7 @@ import javax.swing._
 import com.github.stivo.gravity.calculation.{StandardGravityCalculator, NaiveDoubleGravityCalculator, NaiveWhileGravityCalculator, NaiveGravityCalculator}
 import squants.space.Meters
 import squants.time.{Hours, Days, Milliseconds}
-
+import Utils._
 import scala.util.Random
 
 /**
@@ -63,9 +63,14 @@ class CircleApplet extends JPanel {
 
   val space = new Space(Main.drawingSurface, gravityCalculator = new NaiveDoubleGravityCalculator())
   val frameCounter = new FrameCounter()
-//  space.addBodies(SolarSystem.bodies)
-  space.addCircles(1000)
+
 //  space.circles :+= new Circle(new Point(Meters(0), Meters(0)), Main.drawingSurface.simulationAreaRadius / 80, color = Color.yellow)
+
+  addAction(this, KeyEvent.VK_S, space.addBodies(SolarSystem.bodies))
+  addAction(this, KeyEvent.VK_A, space.addCircles(50))
+
+//  space.addBodies(SolarSystem.bodies)
+//  space.addCircles(1000)
 
   Main.drawingSurface.addListeners(this)
 
