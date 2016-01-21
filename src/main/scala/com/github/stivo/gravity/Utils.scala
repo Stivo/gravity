@@ -28,8 +28,8 @@ object Utils {
     s"ACTION_$counter"
   }
 
-  def addAction(panel: JPanel, keyEvent: Int, func: => Unit, name: String = nextName()): Unit = {
-    panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(keyEvent, 0), name)
+  def addAction(panel: JPanel, keyEvent: Int, func: => Unit, modifiers: Int = 0, name: String = nextName()): Unit = {
+    panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(keyEvent, modifiers), name)
     panel.getActionMap.put(name, function2Action(func))
   }
 

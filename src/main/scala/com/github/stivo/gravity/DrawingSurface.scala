@@ -65,6 +65,7 @@ class DrawingSurface {
     applet.addMouseWheelListener(new MouseWheelListener {
       override def mouseWheelMoved(e: MouseWheelEvent): Unit = {
         changeZoom(e.getWheelRotation)
+        applet.repaint()
       }
     })
 
@@ -85,6 +86,7 @@ class DrawingSurface {
         _xOffset = xOffsetAtStart
         _yOffset = yOffsetAtStart
         move(-dx, dy)
+        applet.repaint()
       }
     }
     applet.addMouseMotionListener(adapter)

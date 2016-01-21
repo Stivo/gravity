@@ -43,18 +43,26 @@ object Main {
     f.pack
     f.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH)
     f.setVisible(true)
-    new Timer(10, new ActionListener() {
-      override def actionPerformed(e: ActionEvent): Unit = {
-        if (!break) {
-          StopWatch.reset()
-          StopWatch.start("Computing gravity")
-          applet.space.nextTick()
-          StopWatch.start("Detect collisions")
-          applet.space.applyCollisions()
-          applet.repaint()
+    val updateThread = new Thread {
+      override def run(): Unit = {
+        while (true) {
+          Thread.sleep(10)
+          if (!break) {
+            StopWatch.reset()
+            StopWatch.start("Computing gravity")
+            applet.space.nextTick()
+            StopWatch.start("Detect collisions")
+            applet.space.applyCollisions()
+            SwingUtilities.invokeLater(new Runnable {
+              override def run(): Unit =
+                applet.repaint()
+            })
+          }
         }
       }
-    }).start()
+    }
+    updateThread.setDaemon(true)
+    updateThread.start()
   }
 }
 
@@ -68,6 +76,7 @@ class CircleApplet extends JPanel {
 
   addAction(this, KeyEvent.VK_S, space.addBodies(SolarSystem.bodies))
   addAction(this, KeyEvent.VK_A, space.addCircles(50))
+  addAction(this, KeyEvent.VK_A, space.addCircles(1000), InputEvent.SHIFT_DOWN_MASK)
 
 //  space.addBodies(SolarSystem.bodies)
 //  space.addCircles(1000)
@@ -81,7 +90,7 @@ class CircleApplet extends JPanel {
 
   override def paintComponent(g: Graphics): Unit = {
     super.paintComponent(g)
-    StopWatch.start("Painting self")
+//    StopWatch.start("Painting self")
     val g2d: Graphics2D = g.create().asInstanceOf[Graphics2D]
     Main.drawingSurface.setGraphics(g2d)
     g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY)
@@ -100,7 +109,7 @@ class CircleApplet extends JPanel {
     frameCounter.addTick()
 
     var info: String = f"Time: ${space.time.toDays}%.1f Circles: ${space.circles.size}%d, fps: ${frameCounter.framesPerSecond()}%d, "
-    info += StopWatch.finish().mapValues(long => long + "ms").mkString(", ")
+//    info += StopWatch.finish().mapValues(long => long + "ms").mkString(", ")
     Main.label.setText(info)
     g2d.dispose
   }
