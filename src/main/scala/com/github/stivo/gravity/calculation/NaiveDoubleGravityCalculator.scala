@@ -5,9 +5,6 @@ import squants.motion.{Velocity, MetersPerSecondSquared, MetersPerSecond}
 import squants.time.Time
 import scala.collection.optimizer._
 
-/**
- * Created by Stivo on 18.01.2016.
- */
 class NaiveDoubleGravityCalculator(parallel: Boolean = true) extends GravityCalculator {
 
   def makeSpeed(point: (Double, Double), timePerTick: Time) = {

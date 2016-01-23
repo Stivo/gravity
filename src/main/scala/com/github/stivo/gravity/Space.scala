@@ -2,7 +2,7 @@ package com.github.stivo.gravity
 
 import java.awt.{Graphics2D, Color}
 
-import com.github.stivo.gravity.calculation.{NaiveDoubleGravityCalculator, StandardGravityCalculator, GravityCalculator}
+import com.github.stivo.gravity.calculation._
 import squants.mass.Kilograms
 import squants.motion._
 import squants.space.{Length, Meters}
@@ -13,7 +13,8 @@ import scala.util.Random
 
 class Space(drawingSurface: DrawingSurface,
             var timePerTick: Time = Hours(6),
-            var gravityCalculator: GravityCalculator = new NaiveDoubleGravityCalculator(),
+            val gravityCalculator: GravityCalculator = new NaiveDoubleGravityCalculator(),
+            val collisionApplier: CollisionApplier = new StandardCollisionApplier(),
             val random: Random = new Random()) {
 
 
@@ -90,48 +91,9 @@ class Space(drawingSurface: DrawingSurface,
     }
   }
 
-  def mergeAll(circles: IndexedSeq[Circle]): Circle = {
-    val by: IndexedSeq[Circle] = circles.sortBy(-_.radius)
-    val newRadius = {
-      val allRadsSquared = by.map(_.mass.toKilograms).sum
-      Meters(Math.pow(allRadsSquared, 1.0 / 3))
-    }
-    val speed2D: Speed2D = {
-      by.map(cir => cir.acceleration * cir.mass.toKilograms).reduce(_ + _) / by.map(_.mass.toKilograms).sum
-    }
-    val out = new Circle(
-      by(0).center,
-      newRadius,
-      acceleration = speed2D,
-      collisionCount = by.map(_.collisionCount).max + 1,
-      color = by(0).color
-    )
-    out
-  }
 
   def applyCollisions(): Unit = {
-    var collisions = 0
-    def applyNextCollision(): Boolean = {
-      var collisionCandidates = circles.toSet
-      while (!collisionCandidates.isEmpty) {
-        val candidate = collisionCandidates.head
-        collisionCandidates = collisionCandidates.tail
-        val collidingWithCandidate = collisionCandidates.filter(_.collidesWith(candidate))
-        if (!collidingWithCandidate.isEmpty) {
-          val colliding = collidingWithCandidate + candidate
-          val newCircle = mergeAll(colliding.toIndexedSeq)
-          circles = circles.filterNot(colliding.contains(_))
-          circles = circles :+ newCircle
-          return true
-        }
-        collisionCandidates -= candidate
-      }
-      false
-    }
-    while (applyNextCollision()) {
-      collisions += 1
-    }
-    StopWatch.addEntry("Collisions", "" + collisions)
+    circles = collisionApplier.applyCollisions(circles)
   }
 
   def updateVelocities() = {
