@@ -20,6 +20,7 @@ class Space(drawingSurface: DrawingSurface,
 
   var time: Time = Days(0)
 
+  val circleLock = new Object
   var circles = Vector[Circle]()
 
   private var step: Int = 0
@@ -34,15 +35,17 @@ class Space(drawingSurface: DrawingSurface,
   }
 
   def addCircles(amount: Int = 1, percentOfScreen: Double = 0.01): Unit = {
-    circles ++= {
-      def randomDoubleInSpace = randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3)
-      for (x <- 1 to amount)
-        yield new Circle(
-          Point(Meters(randomDoubleInSpace) + drawingSurface.xOffset, Meters(randomDoubleInSpace) + drawingSurface.yOffset),
-          Meters(randomPositiveDouble(drawingSurface.minimumDrawingArea.toMeters * percentOfScreen)),
-          Speed2D(MetersPerSecond(randomDouble(100000)), MetersPerSecond(randomDouble(100000))),
-          color = randomLightColor()
-        )
+    circleLock.synchronized {
+      circles ++= {
+        def randomDoubleInSpace = randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3)
+        for (x <- 1 to amount)
+          yield new Circle(
+            Point(Meters(randomDoubleInSpace) + drawingSurface.xOffset, Meters(randomDoubleInSpace) + drawingSurface.yOffset),
+            Meters(randomPositiveDouble(drawingSurface.minimumDrawingArea.toMeters * percentOfScreen)),
+            Speed2D(MetersPerSecond(randomDouble(100000)), MetersPerSecond(randomDouble(100000))),
+            color = randomLightColor()
+          )
+      }
     }
   }
 
@@ -113,14 +116,16 @@ class Space(drawingSurface: DrawingSurface,
   def nextTick(): Unit = {
     step += 1
     time += timePerTick
-    StopWatch.reset()
-    StopWatch.start("Updating velocities")
-    updateVelocities()
-    StopWatch.start("Updating positions")
-    updateCircles()
-    StopWatch.start("Applying collisions")
-    applyCollisions()
-    StopWatch.finish()
+    circles.synchronized {
+      StopWatch.reset()
+      StopWatch.start("Updating velocities")
+      updateVelocities()
+      StopWatch.start("Updating positions")
+      updateCircles()
+      StopWatch.start("Applying collisions")
+      applyCollisions()
+      StopWatch.finish()
+    }
   }
 
 }

@@ -4,7 +4,7 @@ import java.awt._
 import java.awt.event._
 import javax.swing._
 
-import com.github.stivo.gravity.calculation.{StandardGravityCalculator, NaiveDoubleGravityCalculator, NaiveWhileGravityCalculator, NaiveGravityCalculator}
+import com.github.stivo.gravity.calculation._
 import squants.space.Meters
 import squants.time.{Hours, Days, Milliseconds}
 import Utils._
@@ -73,7 +73,11 @@ class CircleApplet extends JPanel {
 
   var components: Map[String, JLabel] = Map.empty
 
-  val space = new Space(Main.drawingSurface, gravityCalculator = new NaiveDoubleGravityCalculator())
+  val space = new Space(
+    Main.drawingSurface,
+    gravityCalculator = new NaiveDoubleGravityCalculator()
+//    collisionApplier = new RecursiveCollisionApplier()
+  )
 
   //  space.circles :+= new Circle(new Point(Meters(0), Meters(0)), Main.drawingSurface.simulationAreaRadius / 80, color = Color.yellow)
 

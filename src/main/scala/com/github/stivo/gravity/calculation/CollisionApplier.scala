@@ -3,11 +3,24 @@ package com.github.stivo.gravity.calculation
 import com.github.stivo.gravity.{Speed2D, StopWatch, Circle}
 import squants.space.Meters
 
-/**
- * Created by Stivo on 23.01.2016.
- */
-trait CollisionApplier {
-  def applyCollisions(circles: Vector[Circle]): Vector[Circle]
+trait CollisionApplier extends CollisionDetector {
+
+  def applyCollisions(circlesIn: Vector[Circle]): Vector[Circle] = {
+    var circles = circlesIn
+    var collisions: CollisionGroups = detectCollisions(circles)
+    while (!collisions.collisionGroups.isEmpty) {
+      var newCircles: Set[Circle] = Set.empty
+      var removeCircles: Set[Circle] = Set.empty
+      for (collision <- collisions.collisionGroups) {
+        val newCircle: Circle = mergeAll(collision.toIndexedSeq)
+        newCircles += newCircle
+        removeCircles ++= collision
+      }
+      circles = circles.filterNot(circle => removeCircles.contains(circle)) ++ newCircles
+      collisions = detectCollisions(circles)
+    }
+    circles
+  }
 
   def mergeAll(circles: IndexedSeq[Circle]): Circle = {
     val by: IndexedSeq[Circle] = circles.sortBy(-_.radius)
