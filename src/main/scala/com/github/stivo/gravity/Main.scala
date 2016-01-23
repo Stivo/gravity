@@ -75,8 +75,8 @@ class CircleApplet extends JPanel {
 
   val space = new Space(
     Main.drawingSurface,
-    gravityCalculator = new NaiveDoubleGravityCalculator()
-//    collisionApplier = new RecursiveCollisionApplier()
+    gravityCalculator = new NaiveDoubleGravityCalculator(),
+    collisionApplier = new StandardCollisionApplierWithoutUnits()
   )
 
   //  space.circles :+= new Circle(new Point(Meters(0), Meters(0)), Main.drawingSurface.simulationAreaRadius / 80, color = Color.yellow)
@@ -84,7 +84,8 @@ class CircleApplet extends JPanel {
   addAction(this, KeyEvent.VK_S, space.addBodies(SolarSystem.bodies))
   addAction(this, KeyEvent.VK_A, space.addCircles(50))
   addAction(this, KeyEvent.VK_A, space.addCircles(1000), InputEvent.SHIFT_DOWN_MASK)
-  addAction(this, KeyEvent.VK_B, space.addCircles(1, 0.25))
+  addAction(this, KeyEvent.VK_B, space.addCircles(1, 0.1))
+  addAction(this, KeyEvent.VK_B, space.addCircles(1, 0.25), InputEvent.SHIFT_DOWN_MASK)
 
   //  space.addBodies(SolarSystem.bodies)
   //  space.addCircles(1000)

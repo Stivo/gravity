@@ -73,28 +73,6 @@ class Space(drawingSurface: DrawingSurface,
     drawingSurface.drawScale()
   }
 
-
-  //  def crossProduct = {
-  //    for {
-  //      (circle1, index) <- circles.zipWithIndex
-  //      circle2 <- circles.take(index + 1)
-  //      if circle1 ne circle2
-  //    } yield (circle1, circle2)
-  //  }
-
-  def crossProduct(f: (Circle, Circle) => Unit) = {
-    var int1 = 0
-    while (int1 < circles.length) {
-      var int2 = 0
-      while (int2 < int1) {
-        f(circles(int1), circles(int2))
-        int2 += 1
-      }
-      int1 += 1
-    }
-  }
-
-
   def applyCollisions(): Unit = {
     circles = collisionApplier.applyCollisions(circles)
   }
@@ -116,7 +94,7 @@ class Space(drawingSurface: DrawingSurface,
   def nextTick(): Unit = {
     step += 1
     time += timePerTick
-    circles.synchronized {
+    circleLock.synchronized {
       StopWatch.reset()
       StopWatch.start("Updating velocities")
       updateVelocities()

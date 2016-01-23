@@ -7,6 +7,7 @@ trait CollisionApplier extends CollisionDetector {
 
   def applyCollisions(circlesIn: Vector[Circle]): Vector[Circle] = {
     var circles = circlesIn
+    var iterations = 1
     var collisions: CollisionGroups = detectCollisions(circles)
     while (!collisions.collisionGroups.isEmpty) {
       var newCircles: Set[Circle] = Set.empty
@@ -18,7 +19,9 @@ trait CollisionApplier extends CollisionDetector {
       }
       circles = circles.filterNot(circle => removeCircles.contains(circle)) ++ newCircles
       collisions = detectCollisions(circles)
+      iterations += 1
     }
+    StopWatch.addEntry("Collision iterations", iterations+"")
     circles
   }
 

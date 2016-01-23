@@ -13,40 +13,6 @@
 //
 //  var currentCircles: Map[Int, FastCircle] = null
 //
-//  override def applyCollisions(circles: Vector[Circle]): Vector[Circle] = {
-//    currentCircles = circles.map(circle => (circle.id, new FastCircle(circle))).toMap
-//    val quadrant: Quadrant = Quadrant(currentCircles.values.toVector)
-//    var all = applyCollisionsInQuadrant(quadrant.xLowYLow)
-//    all ++= applyCollisionsInQuadrant(quadrant.xLowYHigh)
-//    all ++= applyCollisionsInQuadrant(quadrant.xHighYLow)
-//    all ++= applyCollisionsInQuadrant(quadrant.xHighYHigh)
-//    all.map(_.circle)
-//  }
-//
-//  def applyCollisionsInQuadrant(quadrant: Coll[FastCircle]): Coll[FastCircle] = {
-//    var quadrantCopy = quadrant.toSet
-//    def applyNextCollision(): Boolean = {
-//      var collisionCandidates = quadrantCopy.toVector
-//      for (candidate <- collisionCandidates) {
-//        val candidate = collisionCandidates.head
-//        collisionCandidates = collisionCandidates.tail
-//        val collidingWithCandidate = collisionCandidates.filter(_.collidesWith(candidate))
-//        if (!collidingWithCandidate.isEmpty) {
-//          val colliding = collidingWithCandidate :+ candidate
-//
-//          val newCircle = mergeAll(colliding.map(_.circle).toIndexedSeq)
-//          quadrantCopy --= colliding
-//          quadrantCopy += new FastCircle(newCircle)
-//          return true
-//        }
-//      }
-//      false
-//    }
-//    while (applyNextCollision()) {
-//    }
-//    quadrantCopy.toVector
-//  }
-//
 //
 //  class Quadrant(
 //                  val xLowYLow: Coll[T],
@@ -112,6 +78,9 @@
 //    }
 //  }
 //
+//  override def detectCollisions(circles: Iterable[Circle]): CollisionGroups = {
+//    createFastCircles()
+//  }
 //}
 //
 //
