@@ -17,7 +17,6 @@ class Space(drawingSurface: DrawingSurface,
             val random: Random = new Random()) {
 
 
-
   var time: Time = Days(0)
 
   var circles = Vector[Circle]()
@@ -27,6 +26,7 @@ class Space(drawingSurface: DrawingSurface,
   def randomDouble(range: Double = 1): Double = (random.nextDouble() - 0.5) * range
 
   def randomPositiveDouble(range: Double = 1): Double = random.nextDouble() * range
+
   def randomLightColor(): Color = {
     def randomLight = random.nextInt(199) + 56
     new Color(randomLight, randomLight, randomLight)
@@ -131,12 +131,11 @@ class Space(drawingSurface: DrawingSurface,
     while (applyNextCollision()) {
       collisions += 1
     }
-    StopWatch.addEntry("Collisions", collisions)
+    StopWatch.addEntry("Collisions", "" + collisions)
   }
 
   def updateVelocities() = {
     val vectors: Iterable[Speed2D] = gravityCalculator.calculateForceVectors(circles, timePerTick)
-    StopWatch.start("Computing final accelerations")
     vectors.zip(circles).foreach {
       case (speed, circle) =>
         circle.setGravityPull(speed)
