@@ -57,8 +57,8 @@ class Circle(var center: Point,
 
   def asEllipsis(drawingSurface: DrawingSurface): Ellipse2D.Double = {
     val doubled: Double = drawingSurface.convertRadius(radius * 2)
-    val convertX1: Double = drawingSurface.convertWidth(center.x - radius)
-    val convertY1: Double = drawingSurface.convertHeight(center.y - radius)
+    val convertX1: Double = drawingSurface.convertXPositionToXPixel(center.x - radius)
+    val convertY1: Double = drawingSurface.convertYPositionToYPixel(center.y - radius)
     new Ellipse2D.Double(convertX1, convertY1, doubled, doubled)
   }
 

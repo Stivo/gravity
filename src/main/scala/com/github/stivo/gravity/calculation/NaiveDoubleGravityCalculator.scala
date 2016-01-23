@@ -18,7 +18,7 @@ class NaiveDoubleGravityCalculator(parallel: Boolean = true) extends GravityCalc
 
   def addTuples(t1: (Double, Double), t2: (Double, Double)) = (t1._1 + t2._1, t1._2 + t2._2)
 
-  override def calculateForceVectors(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
+  override def calculateForceVectorsForMoreThanOne(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
     val circles1 = if (parallel) circles.par else circles
     val fastCircles =
       for (c1 <- circles1)

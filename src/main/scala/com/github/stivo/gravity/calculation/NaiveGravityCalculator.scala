@@ -16,7 +16,7 @@ class NaiveGravityCalculator(parallel: Boolean = true) extends GravityCalculator
     Speed2D(x, y)
   }
 
-  override def calculateForceVectors(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
+  override def calculateForceVectorsForMoreThanOne(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
     val circles1 = if (parallel) {
       circles.par
     } else {

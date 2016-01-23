@@ -77,6 +77,7 @@ class CircleApplet extends JPanel {
   addAction(this, KeyEvent.VK_S, space.addBodies(SolarSystem.bodies))
   addAction(this, KeyEvent.VK_A, space.addCircles(50))
   addAction(this, KeyEvent.VK_A, space.addCircles(1000), InputEvent.SHIFT_DOWN_MASK)
+  addAction(this, KeyEvent.VK_B, space.addCircles(1, 0.25))
 
 //  space.addBodies(SolarSystem.bodies)
 //  space.addCircles(1000)
@@ -92,7 +93,6 @@ class CircleApplet extends JPanel {
     super.paintComponent(g)
 //    StopWatch.start("Painting self")
     val g2d: Graphics2D = g.create().asInstanceOf[Graphics2D]
-    Main.drawingSurface.setGraphics(g2d)
     g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY)
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY)

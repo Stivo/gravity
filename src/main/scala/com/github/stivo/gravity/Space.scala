@@ -32,13 +32,13 @@ class Space(drawingSurface: DrawingSurface,
     new Color(randomLight, randomLight, randomLight)
   }
 
-  def addCircles(amount: Int = 1): Unit = {
+  def addCircles(amount: Int = 1, percentOfScreen: Double = 0.01): Unit = {
     circles ++= {
       def randomDoubleInSpace = randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3)
       for (x <- 0 to amount)
         yield new Circle(
           Point(Meters(randomDoubleInSpace) + drawingSurface.xOffset, Meters(randomDoubleInSpace) + drawingSurface.yOffset),
-          Meters(randomPositiveDouble(drawingSurface.minimumDrawingArea.toMeters / 100)),
+          Meters(randomPositiveDouble(drawingSurface.minimumDrawingArea.toMeters * percentOfScreen)),
           Speed2D(MetersPerSecond(randomDouble(100000)), MetersPerSecond(randomDouble(100000))),
           color = randomLightColor()
         )
@@ -62,9 +62,11 @@ class Space(drawingSurface: DrawingSurface,
   }
 
   def drawTo(g2d: Graphics2D) = {
+    drawingSurface.setGraphics(g2d)
     circles.foreach(circle =>
       circle.drawTo(g2d, drawingSurface)
     )
+    drawingSurface.drawScale()
   }
 
 

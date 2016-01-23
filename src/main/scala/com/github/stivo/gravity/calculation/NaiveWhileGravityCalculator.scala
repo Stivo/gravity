@@ -13,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class NaiveWhileGravityCalculator extends GravityCalculator {
 
-  override def calculateForceVectors(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
+  override def calculateForceVectorsForMoreThanOne(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
     val seconds: Double = timePerTick.toSeconds
     val ds: ArrayBuffer[Speed2D] = new ArrayBuffer[Speed2D](circles.size)
     var counter1 = 0

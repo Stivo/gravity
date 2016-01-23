@@ -6,7 +6,7 @@ import squants.time.Time
 
 class GravityCalculatorV2 extends GravityCalculator {
 
-  override def calculateForceVectors(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
+  override def calculateForceVectorsForMoreThanOne(circles: IndexedSeq[Circle], timePerTick: Time): IndexedSeq[Speed2D] = {
     def crossProduct(f: (Circle, Circle) => Unit) = {
       var int1 = 0
       while (int1 < circles.length) {

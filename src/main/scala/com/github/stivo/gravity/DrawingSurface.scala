@@ -1,13 +1,13 @@
 package com.github.stivo.gravity
 
-import java.awt.Graphics2D
+import java.awt.{Point => AwtPoint, Color, Graphics2D}
 import java.awt.event._
 import javax.swing._
 import javax.swing.event.MouseInputAdapter
-import java.awt.{Point => AwtPoint }
-import squants.space.{Meters, Length}
+import squants.space.{Kilometers, Meters, Length}
 
 class DrawingSurface {
+
 
   private var _xOffset = Meters(0)
   private var _yOffset = Meters(0)
@@ -29,10 +29,18 @@ class DrawingSurface {
     meterToPixel = minimumDrawingArea * 2 / minimumPixels
     this.g2d = g2d
   }
-  
+
+  private def updateSimulationRadius() {
+    if (simulationAreaRadius < minimumDrawingArea) {
+      simulationAreaRadius = minimumDrawingArea
+    }
+  }
+
   def changeZoom(notches: Int) = {
     minimumDrawingArea += minimumDrawingArea * 0.05 * notches
+    updateSimulationRadius()
   }
+
 
   def isInWidth(x: Length) = {
     -simulationAreaRadius < x && x < simulationAreaRadius
@@ -47,18 +55,52 @@ class DrawingSurface {
     _yOffset -= meterToPixel * yDeltaInPixels
   }
 
-  def convertWidth(x: Length): Int = {
+  def convertXPositionToXPixel(x: Length): Int = {
     val middle = displayWidth / 2
     (middle + (x - xOffset) / meterToPixel).toInt
   }
 
-  def convertHeight(y: Length): Int = {
+  def convertYPositionToYPixel(y: Length): Int = {
     val middle = displayHeight / 2
     (middle + (y - yOffset)  / meterToPixel).toInt
   }
 
   def convertRadius(length: Length): Double = {
-    Math.max(5, length / meterToPixel)
+    Math.max(3, length / meterToPixel)
+  }
+
+  def drawScale() = {
+    g2d.setColor(Color.white)
+    drawScaleX()
+    drawScaleY()
+  }
+
+  def drawScaleX(): Unit = {
+    val (scaleSize, width) = getLengthOfScale(displayWidth)
+
+    val midX: Int = (displayWidth / 2).toInt
+    val y: Int = (displayHeight - 10).toInt
+    g2d.drawLine(midX - width, y, midX + width, y)
+    g2d.drawString(scaleSize.toString(Kilometers, "%.0e"), midX, y - 5)
+  }
+
+  def drawScaleY(): Unit = {
+    val (scaleSize, height) = getLengthOfScale(displayHeight)
+
+    val midY: Int = (displayHeight / 2).toInt
+    val x: Int = (displayWidth - 10).toInt
+    g2d.drawLine(x, midY - height, x, midY + height)
+    g2d.drawString(scaleSize.toString(Kilometers,  "%.0e"), x - 30, midY)
+  }
+
+  private def getLengthOfScale(pixels: Double): (Length, Int) = {
+    val minimumWidth: Length = meterToPixel * pixels * 0.08
+    var scaleSize = Meters(1)
+    while (scaleSize < minimumWidth) {
+      scaleSize *= 10
+    }
+    val width: Int = (scaleSize / meterToPixel / 2).toInt
+    (scaleSize, width)
   }
 
   def addListeners(applet: JPanel) = {
