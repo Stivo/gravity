@@ -35,7 +35,7 @@ class Space(drawingSurface: DrawingSurface,
   def addCircles(amount: Int = 1, percentOfScreen: Double = 0.01): Unit = {
     circles ++= {
       def randomDoubleInSpace = randomDouble(drawingSurface.minimumDrawingArea.toMeters * 3)
-      for (x <- 0 to amount)
+      for (x <- 1 to amount)
         yield new Circle(
           Point(Meters(randomDoubleInSpace) + drawingSurface.xOffset, Meters(randomDoubleInSpace) + drawingSurface.yOffset),
           Meters(randomPositiveDouble(drawingSurface.minimumDrawingArea.toMeters * percentOfScreen)),
@@ -110,34 +110,33 @@ class Space(drawingSurface: DrawingSurface,
   }
 
   def applyCollisions(): Unit = {
-    def computeCollidingPairs() = {
-      val collidingPairs: ArrayBuffer[(Circle, Circle)] = ArrayBuffer.empty
-      crossProduct { case (c1, c2) =>
-        if (c1.collidesWith(c2)) {
-          collidingPairs.append((c1, c2))
+    var collisions = 0
+    def applyNextCollision(): Boolean = {
+      var collisionCandidates = circles.toSet
+      while (!collisionCandidates.isEmpty) {
+        val candidate = collisionCandidates.head
+        collisionCandidates = collisionCandidates.tail
+        val collidingWithCandidate = collisionCandidates.filter(_.collidesWith(candidate))
+        if (!collidingWithCandidate.isEmpty) {
+          val colliding = collidingWithCandidate + candidate
+          val newCircle = mergeAll(colliding.toIndexedSeq)
+          circles = circles.filterNot(colliding.contains(_))
+          circles = circles :+ newCircle
+          return true
         }
+        collisionCandidates -= candidate
       }
-      collidingPairs
+      false
     }
-    var collidingPairs = computeCollidingPairs()
-    while (!collidingPairs.isEmpty) {
-      val colliding = collidingPairs
-        .groupBy(_._1)
-        .map {
-        case (key, value) => key +: value.map(_._2)
-      }
-      val newCircles = colliding.map(circles => mergeAll(circles))
-      val remove: Set[Circle] = colliding.flatten.toSet
-      circles = circles.filterNot(circle => remove.contains(circle))
-      circles ++= newCircles
-      collidingPairs = computeCollidingPairs()
+    while (applyNextCollision()) {
+      collisions += 1
     }
+    StopWatch.addEntry("Collisions", collisions)
   }
-
 
   def updateVelocities() = {
     val vectors: Iterable[Speed2D] = gravityCalculator.calculateForceVectors(circles, timePerTick)
-    StopWatch.start("Computing final force")
+    StopWatch.start("Computing final accelerations")
     vectors.zip(circles).foreach {
       case (speed, circle) =>
         circle.setGravityPull(speed)
@@ -145,7 +144,6 @@ class Space(drawingSurface: DrawingSurface,
   }
 
   def updateCircles(): Vector[Circle] = {
-    StopWatch.start("Update Position")
     circles.foreach(_.updatePosition(timePerTick))
     circles = circles.filter(_.withinBounds(drawingSurface))
     circles
@@ -154,11 +152,14 @@ class Space(drawingSurface: DrawingSurface,
   def nextTick(): Unit = {
     step += 1
     time += timePerTick
-    if (step % 10 == 0) {
-      //      addCircles(1000 - circles.size)
-    }
+    StopWatch.reset()
+    StopWatch.start("Updating velocities")
     updateVelocities()
+    StopWatch.start("Updating positions")
     updateCircles()
+    StopWatch.start("Applying collisions")
+    applyCollisions()
+    StopWatch.finish()
   }
 
 }

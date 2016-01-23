@@ -9,6 +9,7 @@ import scala.collection.mutable
 object StopWatch {
 
   private var map: mutable.Map[String, Long] = null
+  private var lastResults: Map[String, Long] = Map.empty
   private var currentPhase: Option[String] = null
 
   reset()
@@ -17,6 +18,10 @@ object StopWatch {
     val now: Long = finishCurrentPhaseIfNeeded()
     map += phase -> now
     currentPhase = Option(phase)
+  }
+
+  def addEntry(phase: String, value: Long): Unit = {
+    map += phase -> value
   }
 
   private def finishCurrentPhaseIfNeeded(): Long = {
@@ -28,10 +33,12 @@ object StopWatch {
     now
   }
 
-  def finish(): mutable.Map[String, Long] = {
+  def finish(): Unit = {
     finishCurrentPhaseIfNeeded()
-    map
+    lastResults = map.toMap
   }
+
+  def lastResult() = lastResults
 
   def reset(): Unit = {
     currentPhase = None

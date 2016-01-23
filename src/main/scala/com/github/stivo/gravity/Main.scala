@@ -17,6 +17,7 @@ object Main {
   val label: JLabel = new JLabel()
   var break: Boolean = false
   val drawingSurface = new DrawingSurface()
+  val ticksPerSecondCounter = new FrameCounter()
 
   //  val stopWatch = new StopWatch
   def main(args: Array[String]) {
@@ -48,11 +49,8 @@ object Main {
         while (true) {
           Thread.sleep(10)
           if (!break) {
-            StopWatch.reset()
-            StopWatch.start("Computing gravity")
             applet.space.nextTick()
-            StopWatch.start("Detect collisions")
-            applet.space.applyCollisions()
+            ticksPerSecondCounter.addTick()
             SwingUtilities.invokeLater(new Runnable {
               override def run(): Unit =
                 applet.repaint()
@@ -70,7 +68,6 @@ class CircleApplet extends JPanel {
   //  val stopWatch = new StopWatch
 
   val space = new Space(Main.drawingSurface, gravityCalculator = new NaiveDoubleGravityCalculator())
-  val frameCounter = new FrameCounter()
 
 //  space.circles :+= new Circle(new Point(Meters(0), Meters(0)), Main.drawingSurface.simulationAreaRadius / 80, color = Color.yellow)
 
@@ -106,10 +103,9 @@ class CircleApplet extends JPanel {
     g2d.setColor(Color.black)
     g2d.fillRect(0, 0, width, height)
     space.drawTo(g2d)
-    frameCounter.addTick()
 
-    var info: String = f"Time: ${space.time.toDays}%.1f Circles: ${space.circles.size}%d, fps: ${frameCounter.framesPerSecond()}%d, "
-//    info += StopWatch.finish().mapValues(long => long + "ms").mkString(", ")
+    var info: String = f"Time: ${space.time.toDays}%.1f Circles: ${space.circles.size}%d, fps: ${Main.ticksPerSecondCounter.framesPerSecond()}%d, "
+    info += StopWatch.lastResult().mapValues(long => long + "ms").mkString(", ")
     Main.label.setText(info)
     g2d.dispose
   }
