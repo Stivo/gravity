@@ -76,7 +76,7 @@ class CircleApplet extends JPanel {
   val space = new Space(
     Main.drawingSurface,
     gravityCalculator = new NaiveDoubleGravityCalculator(),
-    collisionApplier = new StandardCollisionApplierWithoutUnits()
+    collisionApplier = new RecursiveCollisionApplier()
   )
 
   //  space.circles :+= new Circle(new Point(Meters(0), Meters(0)), Main.drawingSurface.simulationAreaRadius / 80, color = Color.yellow)

@@ -22,19 +22,21 @@ class CollisionGroups {
   }
 
   def addCollision(v1: Circle, v2: Circle): Unit = {
-    val oldSet = (map.get(v1.id), map.get(v2.id)) match {
-      case (Some(x), None) =>
-        x
-      case (Some(x), Some(y)) =>
-        x ++ y
-      case (None, Some(x)) =>
-        x
-      case (None, None) =>
-        Set.empty[Circle]
-    }
-    val newSet = oldSet + v1 + v2
-    for (key <- newSet) {
-      map += key.id -> newSet
+    this.synchronized {
+      val oldSet = (map.get(v1.id), map.get(v2.id)) match {
+        case (Some(x), None) =>
+          x
+        case (Some(x), Some(y)) =>
+          x ++ y
+        case (None, Some(x)) =>
+          x
+        case (None, None) =>
+          Set.empty[Circle]
+      }
+      val newSet = oldSet + v1 + v2
+      for (key <- newSet) {
+        map += key.id -> newSet
+      }
     }
   }
 

@@ -49,14 +49,6 @@ class Space(drawingSurface: DrawingSurface,
     }
   }
 
-  //  addCircles(2000)
-  //
-  //  circles +:= new Circle(Point(Meters(0), Meters(0)), Meters(0.5), Acceleration2D(), Color.yellow)
-  //  circles +:= new Circle(Point(Meters(-10), Meters(0)), Meters(0.2), Acceleration2D(), Color.yellow)
-  //  circles +:= new Circle(Point(500, 500), 5, Acceleration())
-
-  //  println(circles)
-
   def addBodies(body: Iterable[Body]) = {
     body.map(_.makeCircle()).foreach(circles +:= _)
   }
@@ -100,7 +92,7 @@ class Space(drawingSurface: DrawingSurface,
       updateVelocities()
       StopWatch.start("Updating positions")
       updateCircles()
-      StopWatch.start("Applying collisions")
+      StopWatch.start("Applying Collisions")
       applyCollisions()
       StopWatch.finish()
     }

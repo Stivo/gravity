@@ -10,7 +10,7 @@ class StandardCollisionApplierWithoutUnits extends CollisionApplier with FastCir
      val fastCircles: GenSeq[FastCircle] = createFastCircles(circles.toVector)
      val groups: CollisionGroups = new CollisionGroups
      for {
-       (c1, i) <- fastCircles.zipWithIndex
+       (c1, i) <- fastCircles.zipWithIndex.par
        c2 <- fastCircles.drop(i)
        if c1 ne c2
        if c1.collidesWith(c2)
