@@ -87,6 +87,8 @@ class CircleApplet extends JPanel {
   addAction(this, KeyEvent.VK_B, space.addCircles(1, 0.1))
   addAction(this, KeyEvent.VK_B, space.addCircles(1, 0.25), InputEvent.SHIFT_DOWN_MASK)
   addAction(this, KeyEvent.VK_DELETE, space.circles = Vector.empty)
+  addAction(this, KeyEvent.VK_O, Main.drawingSurface.config.drawOrbits = !Main.drawingSurface.config.drawOrbits)
+  addAction(this, KeyEvent.VK_N, Main.drawingSurface.config.drawNames = !Main.drawingSurface.config.drawNames)
 
   //  space.addBodies(SolarSystem.bodies)
   //  space.addCircles(1000)

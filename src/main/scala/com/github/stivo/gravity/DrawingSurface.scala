@@ -8,6 +8,7 @@ import squants.space.{Kilometers, Meters, Length}
 
 class DrawingSurface {
 
+  val config = new Config()
 
   private var _xOffset = Meters(0)
   private var _yOffset = Meters(0)
@@ -137,3 +138,5 @@ class DrawingSurface {
 
 
 }
+
+class Config(var drawOrbits: Boolean = false, var drawNames: Boolean = false)

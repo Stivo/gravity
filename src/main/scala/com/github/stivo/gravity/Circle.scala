@@ -48,14 +48,18 @@ class Circle(var center: Point,
   def drawTo(g: Graphics2D, drawingSurface: DrawingSurface): Unit = {
     g.setPaint(color)
     g.fill(asEllipsis(drawingSurface))
-    val radiusInPixel: Double = drawingSurface.convertRadius(center.distance(Point(0.meters, 0.meters)))
-    val xPos: Double = drawingSurface.convertXPositionToXPixel(0.meters)
-    val yPos: Double = drawingSurface.convertYPositionToYPixel(0.meters)
-    g.draw(new Ellipse2D.Double(xPos - radiusInPixel, yPos - radiusInPixel, 2 * radiusInPixel, 2 * radiusInPixel))
-    body.foreach { planet =>
-      g.drawString(planet.name,
-        drawingSurface.convertXPositionToXPixel(center.x),
-        drawingSurface.convertYPositionToYPixel(center.y))
+    if (drawingSurface.config.drawOrbits) {
+      val radiusInPixel: Double = drawingSurface.convertRadius(center.distance(Point(0.meters, 0.meters)))
+      val xPos: Double = drawingSurface.convertXPositionToXPixel(0.meters)
+      val yPos: Double = drawingSurface.convertYPositionToYPixel(0.meters)
+      g.draw(new Ellipse2D.Double(xPos - radiusInPixel, yPos - radiusInPixel, 2 * radiusInPixel, 2 * radiusInPixel))
+    }
+    if (drawingSurface.config.drawNames) {
+      body.foreach { planet =>
+        g.drawString(planet.name,
+          drawingSurface.convertXPositionToXPixel(center.x),
+          drawingSurface.convertYPositionToYPixel(center.y))
+      }
     }
     //    if (this.collisionCount > 0) {
     //    g.setPaint(Color.red)
