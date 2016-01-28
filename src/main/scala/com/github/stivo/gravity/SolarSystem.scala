@@ -62,7 +62,7 @@ class Body(val mass: Mass, val radius: Length, val speed: Velocity, val color: C
     Point(SolarSystem.distanceToSun(this) * -1, Meters(0)),
     radius,
     color = color,
-    acceleration = Speed2D(MetersPerSecond(0), speed),
+    speed = Speed2D(MetersPerSecond(0), speed),
     massIn = Some(mass),
     body = Some(this)
   )

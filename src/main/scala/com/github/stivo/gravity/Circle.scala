@@ -17,7 +17,7 @@ object Circle {
 
 class Circle(var center: Point,
              var radius: Length,
-             var acceleration: Speed2D = Speed2D(),
+             var speed: Speed2D = Speed2D(),
              var color: Color = Color.white,
              var collisionCount: Int = 0,
              var massIn: Option[Mass] = None,
@@ -41,8 +41,8 @@ class Circle(var center: Point,
   }
 
   def updatePosition(tick: Time): Unit = {
-    acceleration = acceleration + gravityPull
-    center = center.+(acceleration, tick)
+    speed = speed + gravityPull
+    center = center.+(speed, tick)
   }
 
   def drawTo(g: Graphics2D, drawingSurface: DrawingSurface): Unit = {
@@ -94,7 +94,7 @@ class Circle(var center: Point,
   }
 
   override def toString: String =
-    f"$center%s (${radius.toKilometers}%.1e radius) $acceleration, $mass"
+    f"$center%s (${radius.toKilometers}%.1e radius) $speed, $mass"
 
   override def equals(any: Any): Boolean = any match {
     case other: Circle => this.id == other.id

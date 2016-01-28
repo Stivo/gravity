@@ -89,6 +89,8 @@ class CircleApplet extends JPanel {
   addAction(this, KeyEvent.VK_DELETE, space.circles = Vector.empty)
   addAction(this, KeyEvent.VK_O, Main.drawingSurface.config.drawOrbits = !Main.drawingSurface.config.drawOrbits)
   addAction(this, KeyEvent.VK_N, Main.drawingSurface.config.drawNames = !Main.drawingSurface.config.drawNames)
+  addAction(this, KeyEvent.VK_ADD, space.timePerTick = space.timePerTick * 2)
+  addAction(this, KeyEvent.VK_SUBTRACT, space.timePerTick = space.timePerTick / 2)
 
   //  space.addBodies(SolarSystem.bodies)
   //  space.addCircles(1000)
@@ -118,7 +120,8 @@ class CircleApplet extends JPanel {
     g2d.fillRect(0, 0, width, height)
     space.drawTo(g2d)
 
-    val info: String = f"Time: ${space.time.toDays}%.1f Circles: ${space.circles.size}%d, fps: ${Main.ticksPerSecondCounter.framesPerSecond()}%d, "
+    var info: String = f"Time: ${space.time.toDays}%.1f Circles: ${space.circles.size}%d, fps: ${Main.ticksPerSecondCounter.framesPerSecond()}%d, "
+    info += s"${space.timePerTick.toString(Days, "%.1f")}, ${(space.timePerTick * Main.ticksPerSecondCounter.framesPerSecond()).toString(Days, "%.1f")}"
     if (!space.circles.isEmpty) {
       println(StopWatch.lastResult().mkString(", "))
     }

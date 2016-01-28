@@ -15,7 +15,7 @@ object Geometry {
   var gravitation = 6.674 * (10 ** -11) // N?m2/kg2
 }
 
-case class Point(x: Length, y: Length) {
+case class Point(var x: Length, var y: Length) {
 
   def distanceToSquared(other: Point): Double = {
     val xDistance = x.toMeters - other.x.toMeters

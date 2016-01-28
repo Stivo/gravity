@@ -50,7 +50,15 @@ class Space(drawingSurface: DrawingSurface,
   }
 
   def addBodies(body: Iterable[Body]) = {
-    body.map(_.makeCircle()).foreach(circles +:= _)
+    body.map(_.makeCircle()).zipWithIndex.map { case (circle, index) =>
+      if (index % 2 == 0 || circle.body.get.name == "earth" || circle.body.get.name == "moon") {
+        circle
+      } else {
+        circle.center.x = circle.center.x * -1
+        circle.speed = circle.speed * -1
+        circle
+      }
+    }.foreach(circles +:= _)
   }
 
   def circleForBody(body: Body): Option[Circle] = {

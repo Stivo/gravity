@@ -32,12 +32,12 @@ trait CollisionApplier extends CollisionDetector {
       Meters(Math.pow(allRadsSquared, 1.0 / 3))
     }
     val speed2D: Speed2D = {
-      by.map(cir => cir.acceleration * cir.mass.toKilograms).reduce(_ + _) / by.map(_.mass.toKilograms).sum
+      by.map(cir => cir.speed * cir.mass.toKilograms).reduce(_ + _) / by.map(_.mass.toKilograms).sum
     }
     val out = new Circle(
       by(0).center,
       newRadius,
-      acceleration = speed2D,
+      speed = speed2D,
       collisionCount = by.map(_.collisionCount).max + 1,
       color = by(0).color
     )
