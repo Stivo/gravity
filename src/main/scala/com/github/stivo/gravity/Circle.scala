@@ -5,6 +5,7 @@ import java.awt.{Color, Graphics2D}
 
 import com.github.stivo.gravity.Utils._
 import squants.mass.{AreaDensity, Kilograms, Mass}
+import squants.space.LengthConversions._
 import squants.motion.{Acceleration, Newtons}
 import squants.space.{Meters, Area, Length}
 import squants.time.Time
@@ -47,6 +48,15 @@ class Circle(var center: Point,
   def drawTo(g: Graphics2D, drawingSurface: DrawingSurface): Unit = {
     g.setPaint(color)
     g.fill(asEllipsis(drawingSurface))
+    val radiusInPixel: Double = drawingSurface.convertRadius(center.distance(Point(0.meters, 0.meters)))
+    val xPos: Double = drawingSurface.convertXPositionToXPixel(0.meters)
+    val yPos: Double = drawingSurface.convertYPositionToYPixel(0.meters)
+    g.draw(new Ellipse2D.Double(xPos - radiusInPixel, yPos - radiusInPixel, 2 * radiusInPixel, 2 * radiusInPixel))
+    body.foreach { planet =>
+      g.drawString(planet.name,
+        drawingSurface.convertXPositionToXPixel(center.x),
+        drawingSurface.convertYPositionToYPixel(center.y))
+    }
     //    if (this.collisionCount > 0) {
     //    g.setPaint(Color.red)
     //      g.drawString(collisionCount + "", center.x.toInt, center.y.toInt)
@@ -75,7 +85,7 @@ class Circle(var center: Point,
 
   def gravityTo(other: Circle): Point = {
     val distance: Double = this.center.distanceToSquared(other.center)
-    val acceleration = Geometry.gravitation * (other.mass.toKilograms) / ( distance )
+    val acceleration = Geometry.gravitation * (other.mass.toKilograms) / (distance)
     (other.center - center) * (acceleration / Math.sqrt(distance))
   }
 
